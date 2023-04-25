@@ -1,6 +1,6 @@
 project:
-  name: update-me-to-project-repo-name
-  owner: quickstart@amazon.com
+  name: cfn-abi-spotbynetapp-cloudcheckr
+  owner: kjordan@netapp.com
   package_lambda: false
   regions:
   - ap-northeast-1
@@ -16,18 +16,15 @@ project:
 tests:
   sample:
     parameters:
-      Param1: 'Inputs to Stack'
-      # Examples: of other taskcat dynamic input parameters for more into see http://taskcat.io
-      #
-      #      AvailabilityZones: $[taskcat_genaz_3]
-      #      ByteValue: 1
-      #      PasswordA: $[taskcat_genpass_8A]
-      #      PasswordB: $[taskcat_genpass_32S]
-      #      RandomNumber: $[taskcat_random-numbers]
-      #      RandomString: $[taskcat_random-string]
-      #      StackName: TestStack
-      #      UUID: $[taskcat_genuuid]
-      #
+      APIKey: '88e84dcd-f2dd-4dd0-96c0-113c86982992'
+      APISecret: '3TTeI5IaAFes!!!1lxq80h!Qh!8hpzP0'
+      BillingBucketName: 'billingbucket'
+      CloudTrailBucketName: 'cloudtrailbucket'
+      CurBucketName: 'curbucket'
+      CustomerNumber: '54687'
+
+
+      
     regions:
     - us-east-1
-    template: templates/sample-workload.template.yaml
+    template: templates/CCBuiltIn.json
