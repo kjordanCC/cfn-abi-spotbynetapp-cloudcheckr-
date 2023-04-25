@@ -1,0 +1,239 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Lambda function deployment and execution",
+  "Parameters": {
+    "APIKey": {
+      "Type": "String",
+      "Description": "API Key",
+	  "NoEcho": true
+    },
+    "APISecret": {
+      "Type": "String",
+      "Description": "API Secret",
+	  "NoEcho": true
+
+    },
+    "CustomerNumber": {
+      "Type": "String",
+      "Description": "Customer Number"
+        },
+    "CurBucketName": {
+      "Type": "String",
+      "Description": "Name of the S3 bucket for CUR data"
+    },
+    "BillingBucketName": {
+      "Type": "String",
+      "Description": "Name of the S3 bucket for billing data"
+    },
+    "CloudTrailBucketName": {
+      "Type": "String",
+      "Description": "Name of the S3 bucket for CloudTrail logs"
+    }
+  },
+  "Resources": {
+    "LambdaExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "LambdaExecutionPolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "logs:CreateLogGroup",
+                  "Resource": "arn:aws:logs:*:*:*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": "arn:aws:logs:*:*:log-group:/aws/lambda/*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": "iam:ListAccountAliases",
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "LambdaawsCreateAccountFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "awsCreateAccount.lambda_handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        },
+        "Code": {
+          "S3Bucket": "kurtspublicbucket",
+          "S3Key": "awsCreateAccount.zip"
+        },
+        "Runtime": "python3.8",
+        "Timeout": 300,
+        "MemorySize": 128
+      }
+    },
+    "CustomResourceAwsCreateAccountInvoke": {
+      "Type": "Custom::LambdaInvoke",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "LambdaawsCreateAccountFunction",
+            "Arn"
+          ]
+        },
+        "APIKey": {
+          "Ref": "APIKey"
+        },
+        "APISecret": {
+          "Ref": "APISecret"
+        },
+        "CustomerNumber": {
+          "Ref": "CustomerNumber"
+        }
+      }
+    },
+	"getExternalIDFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "getExternalID.lambda_handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        },
+        "Code": {
+          "S3Bucket": "kurtspublicbucket",
+          "S3Key": "getExternalID.zip"
+        },
+        "Runtime": "python3.8",
+        "Timeout": 300,
+        "MemorySize": 128
+      }
+    },
+    "CustomResourceGetExternalIDInvoke": {
+      "Type": "Custom::LambdaInvoke",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "getExternalIDFunction",
+            "Arn"
+          ]
+        },
+        "APIKey": {
+          "Ref": "APIKey"
+        },
+        "APISecret": {
+          "Ref": "APISecret"
+        },
+        "CustomerNumber": {
+          "Ref": "CustomerNumber"
+        },
+        "AccountNumber": {
+          "Fn::GetAtt": [
+            "CustomResourceAwsCreateAccountInvoke",
+            "accountNumber"
+          ]
+        }
+      }
+	},
+	"deployIAMstack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/cf-cc-4172017/cc_aws_cfn_iam_stack.template.json",
+        "Parameters": {
+          "ExternalId": {
+            "Fn::GetAtt": [
+              "CustomResourceGetExternalIDInvoke",
+              "ExternalId"
+            ]
+		},
+		  "CurBucket": {
+            "Ref": "CurBucketName"
+          },
+          "BillingBucket": {
+            "Ref": "BillingBucketName"
+          },
+          "CloudTrailBucket": {
+            "Ref": "CloudTrailBucketName"
+          }
+		}
+      }
+	},
+	"LambdaAwsCredentialAccountFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "awsCredentialAccount.lambda_handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        },
+        "Code": {
+          "S3Bucket": "kurtspublicbucket",
+          "S3Key": "awsCredentialAccount.zip"
+        },
+        "Runtime": "python3.8",
+        "Timeout": 300,
+        "MemorySize": 128
+      }
+    },
+    "CustomResourceAwsCredentialAccountInvoke": {
+      "Type": "Custom::LambdaInvoke",
+      "DependsOn": "deployIAMstack",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "LambdaAwsCredentialAccountFunction",
+            "Arn"
+          ]
+        },
+        "APIKey": {
+          "Ref": "APIKey"
+        },
+        "APISecret": {
+          "Ref": "APISecret"
+        },
+        "CustomerNumber": {
+          "Ref": "CustomerNumber"
+        },
+		"AccountNumber": {
+          "Fn::GetAtt": [
+            "CustomResourceAwsCreateAccountInvoke",
+            "accountNumber"
+          ]
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "deployIAMstack",
+            "Outputs.RoleArn"
+          ]
+        }
+      }
+    }
+  }
+}
