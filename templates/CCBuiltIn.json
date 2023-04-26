@@ -61,12 +61,12 @@
                   "Effect": "Allow",
                   "Action": "s3:*",
                   "Resource": [
-                    "arn:aws:s3:::${CurBucketName}",
-                    "arn:aws:s3:::${CurBucketName}/*",
-                    "arn:aws:s3:::${BillingBucketName}",
-                    "arn:aws:s3:::${BillingBucketName}/*",
-                    "arn:aws:s3:::${CloudTrailBucketName}",
-                    "arn:aws:s3:::${CloudTrailBucketName}/*"
+                    { "Fn::Sub": "arn:aws:s3:::${CurBucketName}" },
+                    { "Fn::Sub": "arn:aws:s3:::${CurBucketName}/*" },
+                    { "Fn::Sub": "arn:aws:s3:::${BillingBucketName}" },
+                    { "Fn::Sub": "arn:aws:s3:::${BillingBucketName}/*" },
+                    { "Fn::Sub": "arn:aws:s3:::${CloudTrailBucketName}" },
+                    { "Fn::Sub": "arn:aws:s3:::${CloudTrailBucketName}/*" }
                   ]
                 },
                 {
