@@ -40,7 +40,7 @@ def send_response(event, context, response_status, response_data):
     })
 
     headers = {
-        'Content-Type': '',
+        'Content-Type': 'application/json',
         'Content-Length': str(len(response_body))
     }
 
