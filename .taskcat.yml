@@ -1,7 +1,7 @@
 project:
   name: cfn-abi-spotbynetapp-cloudcheckr
   owner: kjordan@netapp.com
-  package_lambda: false
+  package_lambda: true
   regions:
   - ap-northeast-1
   - ap-northeast-2
