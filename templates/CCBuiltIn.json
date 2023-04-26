@@ -1,22 +1,22 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Lambda function deployment and execution",
+  "Description": "Automation of building IAM Role and credentialing against CloudCheckr account",
   "Parameters": {
     "APIKey": {
       "Type": "String",
       "Description": "API Key",
-	  "NoEcho": true
+      "NoEcho": true
     },
     "APISecret": {
       "Type": "String",
       "Description": "API Secret",
-	  "NoEcho": true
+      "NoEcho": true
 
     },
     "CustomerNumber": {
       "Type": "String",
       "Description": "Customer Number"
-        },
+    },
     "CurBucketName": {
       "Type": "String",
       "Description": "Name of the S3 bucket for CUR data"
@@ -54,19 +54,6 @@
               "Statement": [
                 {
                   "Effect": "Allow",
-                  "Action": "logs:CreateLogGroup",
-                  "Resource": "arn:aws:logs:*:*:*"
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "logs:CreateLogStream",
-                    "logs:PutLogEvents"
-                  ],
-                  "Resource": "arn:aws:logs:*:*:log-group:/aws/lambda/*"
-                },
-                {
-                  "Effect": "Allow",
                   "Action": "iam:ListAccountAliases",
                   "Resource": "*"
                 }
@@ -77,6 +64,44 @@
       }
     },
     "LambdaawsCreateAccountFunction": {
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W58",
+              "reason": "Lambda role provides acess to Cloudwatch Logs"
+            },
+            {
+              "id": "W89",
+              "reason": "Lambda does not need to communicate with VPC resources"
+            },
+            {
+              "id": "W92",
+              "reason": "Lambda does not need reserved concurrent executions"
+            }
+          ]
+        },
+        "checkov": {
+          "skip": [
+            {
+              "id": "CKV_AWS_115",
+              "comment": "Lambda does not need reserved concurrent executions."
+            },
+            {
+              "id": "CKV_AWS_116",
+              "comment": "DLQ not needed, as Lambda function only triggered by CloudFormation events."
+            },
+            {
+              "id": "CKV_AWS_117",
+              "comment": "Lambda does not need to communicate with the VPC resources."
+            },
+            {
+              "id": "CKV_AWS_173",
+              "comment": "Environment variables are not sensitive."
+            }
+          ]
+        }
+      },
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "awsCreateAccount.lambda_handler",
@@ -115,7 +140,45 @@
         }
       }
     },
-	"getExternalIDFunction": {
+    "getExternalIDFunction": {
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W58",
+              "reason": "Lambda role provides acess to Cloudwatch Logs"
+            },
+            {
+              "id": "W89",
+              "reason": "Lambda does not need to communicate with VPC resources"
+            },
+            {
+              "id": "W92",
+              "reason": "Lambda does not need reserved concurrent executions"
+            }
+          ]
+        },
+        "checkov": {
+          "skip": [
+            {
+              "id": "CKV_AWS_115",
+              "comment": "Lambda does not need reserved concurrent executions."
+            },
+            {
+              "id": "CKV_AWS_116",
+              "comment": "DLQ not needed, as Lambda function only triggered by CloudFormation events."
+            },
+            {
+              "id": "CKV_AWS_117",
+              "comment": "Lambda does not need to communicate with the VPC resources."
+            },
+            {
+              "id": "CKV_AWS_173",
+              "comment": "Environment variables are not sensitive."
+            }
+          ]
+        }
+      },
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "getExternalID.lambda_handler",
@@ -159,8 +222,8 @@
           ]
         }
       }
-	},
-	"deployIAMstack": {
+    },
+    "deployIAMstack": {
       "Type": "AWS::CloudFormation::Stack",
       "Properties": {
         "TemplateURL": "https://s3.amazonaws.com/cf-cc-4172017/cc_aws_cfn_iam_stack.template.json",
@@ -170,8 +233,8 @@
               "CustomResourceGetExternalIDInvoke",
               "ExternalId"
             ]
-		},
-		  "CurBucket": {
+          },
+          "CurBucket": {
             "Ref": "CurBucketName"
           },
           "BillingBucket": {
@@ -180,10 +243,48 @@
           "CloudTrailBucket": {
             "Ref": "CloudTrailBucketName"
           }
-		}
+        }
       }
-	},
-	"LambdaAwsCredentialAccountFunction": {
+    },
+    "LambdaAwsCredentialAccountFunction": {
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W58",
+              "reason": "Lambda role provides acess to Cloudwatch Logs"
+            },
+            {
+              "id": "W89",
+              "reason": "Lambda does not need to communicate with VPC resources"
+            },
+            {
+              "id": "W92",
+              "reason": "Lambda does not need reserved concurrent executions"
+            }
+          ]
+        },
+        "checkov": {
+          "skip": [
+            {
+              "id": "CKV_AWS_115",
+              "comment": "Lambda does not need reserved concurrent executions."
+            },
+            {
+              "id": "CKV_AWS_116",
+              "comment": "DLQ not needed, as Lambda function only triggered by CloudFormation events."
+            },
+            {
+              "id": "CKV_AWS_117",
+              "comment": "Lambda does not need to communicate with the VPC resources."
+            },
+            {
+              "id": "CKV_AWS_173",
+              "comment": "Environment variables are not sensitive."
+            }
+          ]
+        }
+      },
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "awsCredentialAccount.lambda_handler",
@@ -221,7 +322,7 @@
         "CustomerNumber": {
           "Ref": "CustomerNumber"
         },
-		"AccountNumber": {
+        "AccountNumber": {
           "Fn::GetAtt": [
             "CustomResourceAwsCreateAccountInvoke",
             "accountNumber"
