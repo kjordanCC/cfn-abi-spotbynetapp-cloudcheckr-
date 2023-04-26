@@ -2,6 +2,10 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Automation of building IAM Role and credentialing against CloudCheckr account",
   "Parameters": {
+    "LambdaS3Bucket": {
+      "Type": "String",
+      "Description": "S3 bucket containing Lambda function code"
+    },
     "APIKey": {
       "Type": "String",
       "Description": "API Key",
@@ -138,8 +142,8 @@
           ]
         },
         "Code": {
-          "S3Bucket": "kurtspublicbucket",
-          "S3Key": "awsCreateAccount.zip"
+          "S3Bucket": { "Ref": "LambdaS3Bucket" },
+          "S3Key": "awsCreateAccount/lambda.zip"
         },
         "Runtime": "python3.8",
         "Timeout": 300,
@@ -215,8 +219,8 @@
           ]
         },
         "Code": {
-          "S3Bucket": "kurtspublicbucket",
-          "S3Key": "getExternalID.zip"
+          "S3Bucket": { "Ref": "LambdaS3Bucket" },
+          "S3Key": "getExternalID/lambda.zip"
         },
         "Runtime": "python3.8",
         "Timeout": 300,
@@ -321,8 +325,8 @@
           ]
         },
         "Code": {
-          "S3Bucket": "kurtspublicbucket",
-          "S3Key": "awsCredentialAccount.zip"
+          "S3Bucket": { "Ref": "LambdaS3Bucket" },
+          "S3Key": "awsCredentialAccount/lambda.zip"
         },
         "Runtime": "python3.8",
         "Timeout": 300,
