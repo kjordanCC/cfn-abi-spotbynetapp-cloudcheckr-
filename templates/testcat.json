@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Lambda function deployment and execution",
+  "Description": "Automation of building IAM Role and credentialing against CloudCheckr account",
   "Parameters": {
     "APIKey": {
       "Type": "String",
@@ -64,25 +64,44 @@
       }
     },
     "LambdaawsCreateAccountFunction": {
-		Metadata:
-			cfn_nag:
-				rules_to_suppress:
-					- id: W58
-						reason: Lambda role provides acess to Cloudwatch Logs
-					- id: W89
-						reason: Lambda does not need to communicate with VPC resources:
-					- id: W92
-						reason: Lambda does not need reserved concurrent executions:
-				cehckov:
-					skip:
-					- id: CKV_AWS_115
-						comment: Lambda does not need reserved concurrent executions.
-					- id: CKV_AWS_116
-						comment: DLQ not needed, as Lambda function only triggered by CloudFormation events.
-					- id: CKV_AWS_117
-						comment: Lambda does not need to communicate with the VPC resources.
-					- id: CKV_AWS_173
-						comment: Environment variables are not sensitive. 
+	      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W58",
+              "reason": "Lambda role provides acess to Cloudwatch Logs"
+            },
+            {
+              "id": "W89",
+              "reason": "Lambda does not need to communicate with VPC resources"
+            },
+            {
+              "id": "W92",
+              "reason": "Lambda does not need reserved concurrent executions"
+            }
+          ]
+        },
+        "checkov": {
+          "skip": [
+            {
+              "id": "CKV_AWS_115",
+              "comment": "Lambda does not need reserved concurrent executions."
+            },
+            {
+              "id": "CKV_AWS_116",
+              "comment": "DLQ not needed, as Lambda function only triggered by CloudFormation events."
+            },
+            {
+              "id": "CKV_AWS_117",
+              "comment": "Lambda does not need to communicate with the VPC resources."
+            },
+            {
+              "id": "CKV_AWS_173",
+              "comment": "Environment variables are not sensitive."
+            }
+          ]
+        }
+      },
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "awsCreateAccount.lambda_handler",
@@ -102,7 +121,6 @@
       }
     },
     "CustomResourceAwsCreateAccountInvoke": {
-	
       "Type": "Custom::LambdaInvoke",
       "Properties": {
         "ServiceToken": {
@@ -123,25 +141,44 @@
       }
     },
 	"getExternalIDFunction": {
-		Metadata:
-			cfn_nag:
-				rules_to_suppress:
-					- id: W58
-						reason: Lambda role provides acess to Cloudwatch Logs
-					- id: W89
-						reason: Lambda does not need to communicate with VPC resources:
-					- id: W92
-						reason: Lambda does not need reserved concurrent executions:
-				cehckov:
-					skip:
-					- id: CKV_AWS_115
-						comment: Lambda does not need reserved concurrent executions.
-					- id: CKV_AWS_116
-						comment: DLQ not needed, as Lambda function only triggered by CloudFormation events.
-					- id: CKV_AWS_117
-						comment: Lambda does not need to communicate with the VPC resources.
-					- id: CKV_AWS_173
-						comment: Environment variables are not sensitive. 
+	      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W58",
+              "reason": "Lambda role provides acess to Cloudwatch Logs"
+            },
+            {
+              "id": "W89",
+              "reason": "Lambda does not need to communicate with VPC resources"
+            },
+            {
+              "id": "W92",
+              "reason": "Lambda does not need reserved concurrent executions"
+            }
+          ]
+        },
+        "checkov": {
+          "skip": [
+            {
+              "id": "CKV_AWS_115",
+              "comment": "Lambda does not need reserved concurrent executions."
+            },
+            {
+              "id": "CKV_AWS_116",
+              "comment": "DLQ not needed, as Lambda function only triggered by CloudFormation events."
+            },
+            {
+              "id": "CKV_AWS_117",
+              "comment": "Lambda does not need to communicate with the VPC resources."
+            },
+            {
+              "id": "CKV_AWS_173",
+              "comment": "Environment variables are not sensitive."
+            }
+          ]
+        }
+      },
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "getExternalID.lambda_handler",
@@ -210,25 +247,44 @@
       }
 	},
 	"LambdaAwsCredentialAccountFunction": {
-		Metadata:
-			cfn_nag:
-				rules_to_suppress:
-					- id: W58
-						reason: Lambda role provides acess to Cloudwatch Logs
-					- id: W89
-						reason: Lambda does not need to communicate with VPC resources:
-					- id: W92
-						reason: Lambda does not need reserved concurrent executions:
-				cehckov:
-					skip:
-					- id: CKV_AWS_115
-						comment: Lambda does not need reserved concurrent executions.
-					- id: CKV_AWS_116
-						comment: DLQ not needed, as Lambda function only triggered by CloudFormation events.
-					- id: CKV_AWS_117
-						comment: Lambda does not need to communicate with the VPC resources.
-					- id: CKV_AWS_173
-						comment: Environment variables are not sensitive. 
+	      "Metadata": {
+		"cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W58",
+              "reason": "Lambda role provides acess to Cloudwatch Logs"
+            },
+            {
+              "id": "W89",
+              "reason": "Lambda does not need to communicate with VPC resources"
+            },
+            {
+              "id": "W92",
+              "reason": "Lambda does not need reserved concurrent executions"
+            }
+          ]
+        },
+        "checkov": {
+          "skip": [
+            {
+              "id": "CKV_AWS_115",
+              "comment": "Lambda does not need reserved concurrent executions."
+            },
+            {
+              "id": "CKV_AWS_116",
+              "comment": "DLQ not needed, as Lambda function only triggered by CloudFormation events."
+            },
+            {
+              "id": "CKV_AWS_117",
+              "comment": "Lambda does not need to communicate with the VPC resources."
+            },
+            {
+              "id": "CKV_AWS_173",
+              "comment": "Environment variables are not sensitive."
+            }
+          ]
+        }
+      },
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "awsCredentialAccount.lambda_handler",
