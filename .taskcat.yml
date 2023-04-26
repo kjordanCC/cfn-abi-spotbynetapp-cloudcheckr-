@@ -27,4 +27,4 @@ tests:
       
     regions:
     - us-east-1
-    template: CCBuiltIn.json
+    template: /templates/CCBuiltIn.json
