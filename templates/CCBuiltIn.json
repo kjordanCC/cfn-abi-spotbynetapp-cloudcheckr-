@@ -55,7 +55,7 @@
                 {
                   "Effect": "Allow",
                   "Action": "iam:ListAccountAliases",
-                  "Resource": "arn:aws:iam::*:account-alias/*"
+                  "Resource": "*"
                 },
                 {
                   "Effect": "Allow",
