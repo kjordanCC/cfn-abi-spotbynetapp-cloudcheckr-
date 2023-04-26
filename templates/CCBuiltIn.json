@@ -59,7 +59,11 @@
                 },
                 {
                   "Effect": "Allow",
-                  "Action": "s3:*",
+                  "Action": [
+                    "s3:GetObject",
+                    "s3:PutObject",
+                    "s3:ListBucket"
+                  ],
                   "Resource": [
                     "arn:aws:s3:::${CurBucketName}",
                     "arn:aws:s3:::${CurBucketName}/*",
