@@ -13,12 +13,16 @@ def lambda_handler(event, context):
         account_aliases, account_number = get_account_name()
 
         accountName = account_aliases[0] if account_aliases else account_number
+        print("accountName: ", accountName)
 
         bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
+        print("bearerToken: ", bearerToken)
 
         response = createAccount(customerNumber, accountName, bearerToken)
+        print("response: ", response)
 
         sendResponse = send_response(event, context, 'SUCCESS', {'accountNumber': response['accountId']})
+        print("sendResponse: ", sendResponse)
 
         return response
 
