@@ -55,7 +55,33 @@
                 {
                   "Effect": "Allow",
                   "Action": "iam:ListAccountAliases",
-                  "Resource": "*"
+                  "Resource": "arn:aws:iam::*:account-alias/*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": "s3:*",
+                  "Resource": [
+                    "arn:aws:s3:::${CurBucketName}",
+                    "arn:aws:s3:::${CurBucketName}/*",
+                    "arn:aws:s3:::${BillingBucketName}",
+                    "arn:aws:s3:::${BillingBucketName}/*",
+                    "arn:aws:s3:::${CloudTrailBucketName}",
+                    "arn:aws:s3:::${CloudTrailBucketName}/*"
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": "logs:*",
+                  "Resource": "arn:aws:logs:*:*:*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": "lambda:InvokeFunction",
+                  "Resource": [
+                    "arn:aws:lambda:*:*:function:LambdaawsCreateAccountFunction",
+                    "arn:aws:lambda:*:*:function:getExternalIDFunction",
+                    "arn:aws:lambda:*:*:function:LambdaAwsCredentialAccountFunction"
+                  ]
                 }
               ]
             }
