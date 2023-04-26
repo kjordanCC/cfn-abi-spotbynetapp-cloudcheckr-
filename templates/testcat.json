@@ -5,18 +5,18 @@
     "APIKey": {
       "Type": "String",
       "Description": "API Key",
-      "NoEcho": true
+	  "NoEcho": true
     },
     "APISecret": {
       "Type": "String",
       "Description": "API Secret",
-      "NoEcho": true
+	  "NoEcho": true
 
     },
     "CustomerNumber": {
       "Type": "String",
       "Description": "Customer Number"
-    },
+        },
     "CurBucketName": {
       "Type": "String",
       "Description": "Name of the S3 bucket for CUR data"
@@ -64,7 +64,7 @@
       }
     },
     "LambdaawsCreateAccountFunction": {
-      "Metadata": {
+	      "Metadata": {
         "cfn_nag": {
           "rules_to_suppress": [
             {
@@ -140,8 +140,8 @@
         }
       }
     },
-    "getExternalIDFunction": {
-      "Metadata": {
+	"getExternalIDFunction": {
+	      "Metadata": {
         "cfn_nag": {
           "rules_to_suppress": [
             {
@@ -222,8 +222,8 @@
           ]
         }
       }
-    },
-    "deployIAMstack": {
+	},
+	"deployIAMstack": {
       "Type": "AWS::CloudFormation::Stack",
       "Properties": {
         "TemplateURL": "https://s3.amazonaws.com/cf-cc-4172017/cc_aws_cfn_iam_stack.template.json",
@@ -233,8 +233,8 @@
               "CustomResourceGetExternalIDInvoke",
               "ExternalId"
             ]
-          },
-          "CurBucket": {
+		},
+		  "CurBucket": {
             "Ref": "CurBucketName"
           },
           "BillingBucket": {
@@ -243,12 +243,12 @@
           "CloudTrailBucket": {
             "Ref": "CloudTrailBucketName"
           }
-        }
+		}
       }
-    },
-    "LambdaAwsCredentialAccountFunction": {
-      "Metadata": {
-        "cfn_nag": {
+	},
+	"LambdaAwsCredentialAccountFunction": {
+	      "Metadata": {
+		"cfn_nag": {
           "rules_to_suppress": [
             {
               "id": "W58",
@@ -322,7 +322,7 @@
         "CustomerNumber": {
           "Ref": "CustomerNumber"
         },
-        "AccountNumber": {
+		"AccountNumber": {
           "Fn::GetAtt": [
             "CustomResourceAwsCreateAccountInvoke",
             "accountNumber"
