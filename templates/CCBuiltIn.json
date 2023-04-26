@@ -142,8 +142,14 @@
           ]
         },
         "Code": {
-          "S3Bucket": { "Ref": "LambdaS3Bucket" },
-          "S3Key": "awsCreateAccount/lambda.zip"
+          "ZipFile": {
+            "Fn::Transform": {
+              "Name": "AWS::Include",
+              "Parameters": {
+                "Location": "file://../lambda_functions/packages/awsCreateAccount/lambda.zip"
+              }
+            }
+          }
         },
         "Runtime": "python3.8",
         "Timeout": 300,
@@ -219,8 +225,14 @@
           ]
         },
         "Code": {
-          "S3Bucket": { "Ref": "LambdaS3Bucket" },
-          "S3Key": "getExternalID/lambda.zip"
+          "ZipFile": {
+            "Fn::Transform": {
+              "Name": "AWS::Include",
+              "Parameters": {
+                "Location": "file://../lambda_functions/packages/getExternalID/lambda.zip"
+              }
+            }
+          }
         },
         "Runtime": "python3.8",
         "Timeout": 300,
@@ -325,8 +337,14 @@
           ]
         },
         "Code": {
-          "S3Bucket": { "Ref": "LambdaS3Bucket" },
-          "S3Key": "awsCredentialAccount/lambda.zip"
+          "ZipFile": {
+            "Fn::Transform": {
+              "Name": "AWS::Include",
+              "Parameters": {
+                "Location": "file://../lambda_functions/packages/awsCredentialAccount/lambda.zip"
+              }
+            }
+          }
         },
         "Runtime": "python3.8",
         "Timeout": 300,
