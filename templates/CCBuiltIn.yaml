@@ -151,6 +151,7 @@ Resources:
             - arn:aws:lambda:*:*:function:rLambdaAwsCredentialAccountFunction
 
   rLambdaawsCreateAccountFunction:
+    DependsOn: rCopyZips
     Metadata:
       cfn_nag:
         rules_to_suppress:
@@ -198,6 +199,7 @@ Resources:
       pCustomerNumber:
         Ref: pCustomerNumber
   rgetExternalIDFunction:
+    DependsOn: rCopyZips
     Metadata:
       cfn_nag:
         rules_to_suppress:
@@ -264,6 +266,7 @@ Resources:
         CloudTrailBucket:
           Ref: pCloudTrailBucketName
   rLambdaAwsCredentialAccountFunction:
+    DependsOn: rCopyZips
     Metadata:
       cfn_nag:
         rules_to_suppress:
