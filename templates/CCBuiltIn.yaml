@@ -1,0 +1,324 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Automation of building IAM Role and credentialing against CloudCheckr
+  account
+Parameters:
+  pAPIKey:
+    Type: String
+    Description: API Key
+    NoEcho: true
+  pAPISecret:
+    Type: String
+    Description: API Secret
+    NoEcho: true
+  pCustomerNumber:
+    Type: String
+    Description: Customer Number
+  pCurBucketName:
+    Type: String
+    Description: Name of the S3 bucket for CUR data
+  pBillingBucketName:
+    Type: String
+    Description: Name of the S3 bucket for billing data
+  pCloudTrailBucketName:
+    Type: String
+    Description: Name of the S3 bucket for CloudTrail logs
+  pSRAStagingS3Key:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    Type: String
+    Default: cfn-abi-aws-reference-code
+  pSRASourceS3BucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    Type: String
+    Default: aws-abi-pilot
+Resources:
+  rABIStagingS3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W35
+            reason: S3 access logs intentionally not enabled
+      checkov:
+        skip:
+          - id: CKV_AWS_18
+            comment: S3 access logs intentionally not enabled
+    Properties:
+      BucketName: !Sub ${pSRAStagingS3Key}-${AWS::AccountId}-${AWS::Region}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+      Tags:
+        - Key: abi-solution
+          Value: !Ref pSRAStagingS3Key
+      VersioningConfiguration:
+        Status: Enabled
+  rABIStagingS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: F16
+            reason: GetObject is restricted to AWS account only
+    Properties:
+      Bucket: !Ref rABIStagingS3Bucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AllowDeploymentRoleGetObject
+            Effect: Allow
+            Action: s3:GetObject
+            Principal: '*'
+            Resource: !Sub arn:${AWS::Partition}:s3:::${rABIStagingS3Bucket}/*
+          - Sid: DenyExternalPrincipals
+            Effect: Deny
+            Action: 's3:*'
+            Principal: '*'
+            Resource:
+              - !Sub arn:${AWS::Partition}:s3:::${rABIStagingS3Bucket}
+              - !Sub arn:${AWS::Partition}:s3:::${rABIStagingS3Bucket}/*
+            Condition:
+              StringNotEquals:
+                aws:PrincipalAccount: !Sub ${AWS::AccountId}
+          - Sid: SecureTransport
+            Effect: Deny
+            Action: 's3:*'
+            Principal: '*'
+            Resource:
+              - !Sub arn:${AWS::Partition}:s3:::${rABIStagingS3Bucket}
+              - !Sub arn:${AWS::Partition}:s3:::${rABIStagingS3Bucket}/*
+            Condition:
+              Bool:
+                aws:SecureTransport: False
+  rLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: Allow * in resource when required
+          - id: W28
+            reason: The role name is defined to identify automation resources
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      Policies:
+      - PolicyName: LambdaExecutionPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action: iam:ListAccountAliases
+            Resource: "*"
+          - Effect: Allow
+            Action: s3:*
+            Resource:
+            - Fn::Sub: arn:aws:s3:::${pCurBucketName}
+            - Fn::Sub: arn:aws:s3:::${pCurBucketName}/*
+            - Fn::Sub: arn:aws:s3:::${pBillingBucketName}
+            - Fn::Sub: arn:aws:s3:::${pBillingBucketName}/*
+            - Fn::Sub: arn:aws:s3:::${pCloudTrailBucketName}
+            - Fn::Sub: arn:aws:s3:::${pCloudTrailBucketName}/*
+          - Effect: Allow
+            Action: logs:*
+            Resource: arn:aws:logs:*:*:*
+          - Effect: Allow
+            Action: lambda:InvokeFunction
+            Resource:
+            - arn:aws:lambda:*:*:function:rLambdaawsCreateAccountFunction
+            - arn:aws:lambda:*:*:function:rgetExternalIDFunction
+            - arn:aws:lambda:*:*:function:rLambdaAwsCredentialAccountFunction
+  rLambdaawsCreateAccountFunction:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+        - id: W58
+          reason: Lambda role provides acess to Cloudwatch Logs
+        - id: W89
+          reason: Lambda does not need to communicate with VPC resources
+        - id: W92
+          reason: Lambda does not need reserved concurrent executions
+      checkov:
+        skip:
+        - id: CKV_AWS_115
+          comment: Lambda does not need reserved concurrent executions.
+        - id: CKV_AWS_116
+          comment: DLQ not needed, as Lambda function only triggered by CloudFormation
+            events.
+        - id: CKV_AWS_117
+          comment: Lambda does not need to communicate with the VPC resources.
+        - id: CKV_AWS_173
+          comment: Environment variables are not sensitive.
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: awsCreateAccount.lambda_handler
+      Role:
+        Fn::GetAtt:
+        - rLambdaExecutionRole
+        - Arn
+      Code:
+        ZipFile:
+          Fn::Transform:
+            Name: AWS::Include
+            Parameters:
+              Location: file://../lambda_functions/packages/awsCreateAccount/lambda.zip
+      Runtime: python3.8
+      Timeout: 300
+      MemorySize: 128
+  rCustomResourceAwsCreateAccountInvoke:
+    Type: Custom::LambdaInvoke
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+        - rLambdaawsCreateAccountFunction
+        - Arn
+      pAPIKey:
+        Ref: pAPIKey
+      pAPISecret:
+        Ref: pAPISecret
+      pCustomerNumber:
+        Ref: pCustomerNumber
+  rgetExternalIDFunction:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+        - id: W58
+          reason: Lambda role provides acess to Cloudwatch Logs
+        - id: W89
+          reason: Lambda does not need to communicate with VPC resources
+        - id: W92
+          reason: Lambda does not need reserved concurrent executions
+      checkov:
+        skip:
+        - id: CKV_AWS_115
+          comment: Lambda does not need reserved concurrent executions.
+        - id: CKV_AWS_116
+          comment: DLQ not needed, as Lambda function only triggered by CloudFormation
+            events.
+        - id: CKV_AWS_117
+          comment: Lambda does not need to communicate with the VPC resources.
+        - id: CKV_AWS_173
+          comment: Environment variables are not sensitive.
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: getExternalID.lambda_handler
+      Role:
+        Fn::GetAtt:
+        - rLambdaExecutionRole
+        - Arn
+      Code:
+        ZipFile:
+          Fn::Transform:
+            Name: AWS::Include
+            Parameters:
+              Location: file://../lambda_functions/packages/getExternalID/lambda.zip
+      Runtime: python3.8
+      Timeout: 300
+      MemorySize: 128
+  rCustomResourceGetExternalIDInvoke:
+    Type: Custom::LambdaInvoke
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+        - rgetExternalIDFunction
+        - Arn
+      pAPIKey:
+        Ref: pAPIKey
+      pAPISecret:
+        Ref: pAPISecret
+      pCustomerNumber:
+        Ref: pCustomerNumber
+      AccountNumber:
+        Fn::GetAtt:
+        - rCustomResourceAwsCreateAccountInvoke
+        - accountNumber
+  rdeployIAMstack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3.amazonaws.com/cf-cc-4172017/cc_aws_cfn_iam_stack.template.json
+      Parameters:
+        ExternalId:
+          Fn::GetAtt:
+          - rCustomResourceGetExternalIDInvoke
+          - ExternalId
+        CurBucket:
+          Ref: pCurBucketName
+        BillingBucket:
+          Ref: pBillingBucketName
+        CloudTrailBucket:
+          Ref: pCloudTrailBucketName
+  rLambdaAwsCredentialAccountFunction:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+        - id: W58
+          reason: Lambda role provides acess to Cloudwatch Logs
+        - id: W89
+          reason: Lambda does not need to communicate with VPC resources
+        - id: W92
+          reason: Lambda does not need reserved concurrent executions
+      checkov:
+        skip:
+        - id: CKV_AWS_115
+          comment: Lambda does not need reserved concurrent executions.
+        - id: CKV_AWS_116
+          comment: DLQ not needed, as Lambda function only triggered by CloudFormation
+            events.
+        - id: CKV_AWS_117
+          comment: Lambda does not need to communicate with the VPC resources.
+        - id: CKV_AWS_173
+          comment: Environment variables are not sensitive.
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: awsCredentialAccount.lambda_handler
+      Role:
+        Fn::GetAtt:
+        - rLambdaExecutionRole
+        - Arn
+      Code:
+        ZipFile:
+          Fn::Transform:
+            Name: AWS::Include
+            Parameters:
+              Location: file://../lambda_functions/packages/awsCredentialAccount/lambda.zip
+      Runtime: python3.8
+      Timeout: 300
+      MemorySize: 128
+  rCustomResourceAwsCredentialAccountInvoke:
+    Type: Custom::LambdaInvoke
+    DependsOn: rdeployIAMstack
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+        - rLambdaAwsCredentialAccountFunction
+        - Arn
+      pAPIKey:
+        Ref: pAPIKey
+      pAPISecret:
+        Ref: pAPISecret
+      pCustomerNumber:
+        Ref: pCustomerNumber
+      AccountNumber:
+        Fn::GetAtt:
+        - rCustomResourceAwsCreateAccountInvoke
+        - accountNumber
+      RoleArn:
+        Fn::GetAtt:
+        - rdeployIAMstack
+        - Outputs.RoleArn

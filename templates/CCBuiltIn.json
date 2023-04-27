@@ -31,6 +31,14 @@
     }
   },
   "Resources": {
+    "LambdasS3Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Ref": "LambdaS3BucketStaging"
+        }
+      }
+    },
     "LambdaExecutionRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
