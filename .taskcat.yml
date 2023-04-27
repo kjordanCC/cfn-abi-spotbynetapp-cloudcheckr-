@@ -17,9 +17,11 @@ tests:
       CloudTrailBucketName: 'cloudtrailbucket'
       CurBucketName: 'curbucket'
       CustomerNumber: '54687'
+      pSRASourceS3BucketName: $[taskcat_autobucket]
+      pSRAStagingS3Key: $[taskcat_project_name]
 
 
       
     regions:
     - us-east-1
-    template: templates/CCBuiltIn.yml
+    template: templates/CCBuiltIn.yaml
