@@ -8,7 +8,6 @@ Parameters:
     Description: API Key
     NoEcho: true
   pAPISecret:
-    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     Type: String
     Description: API Secret
     NoEcho: true
