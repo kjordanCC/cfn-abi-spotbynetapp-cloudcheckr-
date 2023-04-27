@@ -4,7 +4,6 @@ Description: Automation of building IAM Role and credentialing against CloudChec
   account
 Parameters:
   pAPIKey:
-    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     Type: String
     Description: API Key
     NoEcho: true
