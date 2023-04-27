@@ -11,14 +11,14 @@ project:
 tests:
   sample:
     parameters:
-      APIKey: "$[taskcat_getenv(MY_API_KEY)]"
-      APISecret: "$[taskcat_getenv(MY_API_SECRET)]"
-      BillingBucketName: 'billingbucket'
-      CloudTrailBucketName: 'cloudtrailbucket'
-      CurBucketName: 'curbucket'
-      CustomerNumber: '54687'
-      pSRASourceS3BucketName: $[taskcat_autobucket]
-      pSRAStagingS3Key: $[taskcat_project_name]
+      pAPIKey: "$[taskcat_getenv(MY_API_KEY)]"
+      pAPISecret: "$[taskcat_getenv(MY_API_SECRET)]"
+      pBillingBucketName: 'billingbucket'
+      pCloudTrailBucketName: 'cloudtrailbucket'
+      pCurBucketName: 'curbucket'
+      pCustomerNumber: '54687'
+      pSRASourceS3BucketName: 'kurtspublicbucket'
+      pSRAStagingS3Key: 'cfn-abi-spotbynetapp-cloudcheckr'
 
 
       
