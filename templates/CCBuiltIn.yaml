@@ -4,33 +4,40 @@ Description: Automation of building IAM Role and credentialing against CloudChec
   account
 Parameters:
   pAPIKey:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     Type: String
     Description: API Key
     NoEcho: true
   pAPISecret:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     Type: String
     Description: API Secret
     NoEcho: true
   pCustomerNumber:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     Type: String
     Description: Customer Number
   pCurBucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     Type: String
     Description: Name of the S3 bucket for CUR data
   pBillingBucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     Type: String
     Description: Name of the S3 bucket for billing data
   pCloudTrailBucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     Type: String
     Description: Name of the S3 bucket for CloudTrail logs
   pSRAStagingS3Key:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     Type: String
-    Default: cfn-abi-aws-reference-code
+    Default: cfn-abi-spotbynetapp-cloudcheckr
   pSRASourceS3BucketName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     Type: String
     Default: aws-abi-pilot
+
 Resources:
   rABIStagingS3Bucket:
     Type: AWS::S3::Bucket
@@ -127,7 +134,7 @@ Resources:
             Action: iam:ListAccountAliases
             Resource: "*"
           - Effect: Allow
-            Action: s3:*
+            Action: s3:GetObject
             Resource:
             - Fn::Sub: arn:aws:s3:::${pCurBucketName}
             - Fn::Sub: arn:aws:s3:::${pCurBucketName}/*
@@ -144,6 +151,7 @@ Resources:
             - arn:aws:lambda:*:*:function:rLambdaawsCreateAccountFunction
             - arn:aws:lambda:*:*:function:rgetExternalIDFunction
             - arn:aws:lambda:*:*:function:rLambdaAwsCredentialAccountFunction
+
   rLambdaawsCreateAccountFunction:
     Metadata:
       cfn_nag:
@@ -173,11 +181,8 @@ Resources:
         - rLambdaExecutionRole
         - Arn
       Code:
-        ZipFile:
-          Fn::Transform:
-            Name: AWS::Include
-            Parameters:
-              Location: file://../lambda_functions/packages/awsCreateAccount/lambda.zip
+        S3Bucket: !Ref pSRASourceS3BucketName
+        S3Key: !Sub ${pSRAStagingS3Key}/lambda_functions/packages/enable_integrations/lambda.zip
       Runtime: python3.8
       Timeout: 300
       MemorySize: 128
@@ -223,11 +228,8 @@ Resources:
         - rLambdaExecutionRole
         - Arn
       Code:
-        ZipFile:
-          Fn::Transform:
-            Name: AWS::Include
-            Parameters:
-              Location: file://../lambda_functions/packages/getExternalID/lambda.zip
+        S3Bucket: !Ref pSRASourceS3BucketName
+        S3Key: !Sub ${pSRAStagingS3Key}/lambda_functions/packages/enable_integrations/lambda.zip
       Runtime: python3.8
       Timeout: 300
       MemorySize: 128
@@ -322,3 +324,137 @@ Resources:
         Fn::GetAtt:
         - rdeployIAMstack
         - Outputs.RoleArn
+
+  rCopyZips:
+    Type: Custom::CopyZips
+    Properties:
+      ServiceToken: !GetAtt 'rCopyZipsFunction.Arn'
+      SourceBucket: !Ref 'pSRASourceS3BucketName'
+      DestBucket: !Ref 'rABIStagingS3Bucket'
+      Prefix: !Sub ${pSRAStagingS3Key}/
+      Objects:
+        - lambda_functions/packages/awsCreateAccount/awsCreateAccount.zip
+        - lambda_functions/packages/awsCredentialAccount/awsCredentialAccount.zip
+        - lambda_functions/packages/getExternalID/getExternalID.zip
+#        - templates/enable_integrations/partner1-enable-integrations.yaml
+
+  rCopyZipsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Path: /
+      Policies:
+        - PolicyName: lambda-copier
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectTagging
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:s3:::${pSRASourceS3BucketName}/'
+                  - !Sub 'arn:${AWS::Partition}:s3:::${pSRASourceS3BucketName}/${pSRAStagingS3Key}/*'
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:PutObjectTagging
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:s3:::${rABIStagingS3Bucket}/'
+                  - !Sub 'arn:${AWS::Partition}:s3:::${rABIStagingS3Bucket}/${pSRAStagingS3Key}/*'
+              - Effect: Allow
+                Action:
+                  - s3:ListAllMyBuckets
+                Resource: '*'
+
+  rCopyZipsFunction:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W58
+            reason: Lambda role provides access to CloudWatch Logs
+          - id: W89
+            reason: Lambda does not need to communicate with VPC resources.
+          - id: W92
+            reason: Lambda does not need reserved concurrent executions.
+      checkov:
+        skip:
+          - id: CKV_AWS_115
+            comment: Lambda does not need reserved concurrent executions.
+          - id: CKV_AWS_116
+            comment: DLQ not needed, as Lambda function only triggered by CloudFormation events.
+          - id: CKV_AWS_117
+            comment: Lambda does not need to communicate with VPC resources.
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Copies objects from a source S3 bucket to a destination
+      Handler: index.handler
+      Runtime: python3.9
+      MemorySize: 128
+      Role: !GetAtt 'rCopyZipsRole.Arn'
+      Timeout: 240
+      Code:
+        ZipFile: |
+          import json
+          import logging
+          import threading
+          import boto3
+          import cfnresponse
+          def copy_objects(source_bucket, dest_bucket, prefix, objects):
+              s3 = boto3.client('s3')
+              for o in objects:
+                  key = prefix + o
+                  copy_source = {
+                      'Bucket': source_bucket,
+                      'Key': key
+                  }
+                  print(('copy_source: %s' % copy_source))
+                  print(('dest_bucket = %s'%dest_bucket))
+                  print(('key = %s' %key))
+                  s3.copy_object(CopySource=copy_source, Bucket=dest_bucket,
+                      Key=key)
+          def bucket_exists():
+              s3 = boto3.client('s3')
+              buckets = s3.list_buckets()
+              for bucket in buckets['Buckets']:
+                  return True
+          def delete_objects(bucket, prefix, objects):
+              s3 = boto3.client('s3')
+              if bucket_exists():
+                  objects = {'Objects': [{'Key': prefix + o} for o in objects]}
+                  s3.delete_objects(Bucket=bucket, Delete=objects)
+          def timeout(event, context):
+              logging.error('Execution is about to time out, sending failure response to CloudFormation')
+              cfnresponse.send(event, context, cfnresponse.FAILED, {}, None)
+          def handler(event, context):
+              # make sure we send a failure to CloudFormation if the function
+              # is going to timeout
+              timer = threading.Timer((context.get_remaining_time_in_millis()
+                      / 1000.00) - 0.5, timeout, args=[event, context])
+              timer.start()
+              print(('Received event: %s' % json.dumps(event)))
+              status = cfnresponse.SUCCESS
+              try:
+                  source_bucket = event['ResourceProperties']['SourceBucket']
+                  dest_bucket = event['ResourceProperties']['DestBucket']
+                  prefix = event['ResourceProperties']['Prefix']
+                  objects = event['ResourceProperties']['Objects']
+                  if event['RequestType'] == 'Delete':
+                      delete_objects(dest_bucket, prefix, objects)
+                  else:
+                      copy_objects(source_bucket, dest_bucket, prefix, objects)
+              except Exception as e:
+                  logging.error('Exception: %s' % e, exc_info=True)
+                  status = cfnresponse.FAILED
+              finally:
+                  timer.cancel()
+                  cfnresponse.send(event, context, status, {}, None)
