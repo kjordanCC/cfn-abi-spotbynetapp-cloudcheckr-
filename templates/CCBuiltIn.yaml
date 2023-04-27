@@ -180,7 +180,7 @@ Resources:
         - Arn
       Code:
         S3Bucket: !Ref pSRASourceS3BucketName
-        S3Key: !Sub ${pSRAStagingS3Key}/lambda_functions/packages/enable_integrations/lambda.zip
+        S3Key: !Sub ${pSRAStagingS3Key}/lambda_functions/packages/awsCreateAccount/awsCreateAccount.zip
       Runtime: python3.8
       Timeout: 300
       MemorySize: 128
@@ -227,7 +227,7 @@ Resources:
         - Arn
       Code:
         S3Bucket: !Ref pSRASourceS3BucketName
-        S3Key: !Sub ${pSRAStagingS3Key}/lambda_functions/packages/enable_integrations/lambda.zip
+        S3Key: !Sub ${pSRAStagingS3Key}/lambda_functions/packages/getExternalID/getExternalID.zip
       Runtime: python3.8
       Timeout: 300
       MemorySize: 128
@@ -292,11 +292,8 @@ Resources:
         - rLambdaExecutionRole
         - Arn
       Code:
-        ZipFile:
-          Fn::Transform:
-            Name: AWS::Include
-            Parameters:
-              Location: file://../lambda_functions/packages/awsCredentialAccount/lambda.zip
+        S3Bucket: !Ref pSRASourceS3BucketName
+        S3Key: !Sub ${pSRAStagingS3Key}/lambda_functions/packages/awsCredentialAccount/awsCredentialAccount.zip
       Runtime: python3.8
       Timeout: 300
       MemorySize: 128
