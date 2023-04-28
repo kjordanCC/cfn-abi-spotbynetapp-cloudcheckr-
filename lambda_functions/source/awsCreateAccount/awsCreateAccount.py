@@ -11,7 +11,7 @@ def lambda_handler(event, context):
         APISecret = event['ResourceProperties']['APISecret']
         customerNumber = event['ResourceProperties']['CustomerNumber']
         account_aliases, account_number = get_account_name()
-
+        print("test")
         accountName = account_aliases[0] if account_aliases else account_number
         print("accountName: ", accountName)
 
