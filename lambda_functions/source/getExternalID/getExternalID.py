@@ -8,9 +8,9 @@ import urllib.parse
 def lambda_handler(event, context):
     print("event: ", event)
     print("context: ", context)
-    APIKey = event['ResourceProperties']['APIKey']
-    APISecret = event['ResourceProperties']['APISecret']
-    customerNumber = event['ResourceProperties']['CustomerNumber']
+    APIKey = event['ResourceProperties']['pAPIKey']
+    APISecret = event['ResourceProperties']['pAPISecret']
+    customerNumber = event['ResourceProperties']['pCustomerNumber']
     accountNumber = event['ResourceProperties']['AccountNumber']
 
     print("getting token")

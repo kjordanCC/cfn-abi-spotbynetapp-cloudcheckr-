@@ -6,9 +6,9 @@ import urllib.parse
 
 def lambda_handler(event, context):
     resource_properties = event['ResourceProperties']
-    APIKey = resource_properties['APIKey']
-    APISecret = resource_properties['APISecret']
-    customerNumber = resource_properties['CustomerNumber']
+    APIKey = resource_properties['pAPIKey']
+    APISecret = resource_properties['pAPISecret']
+    customerNumber = resource_properties['pCustomerNumber']
     accountNumber = resource_properties['AccountNumber']
     RoleArn = resource_properties['RoleArn']
 
