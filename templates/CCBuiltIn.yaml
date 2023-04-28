@@ -119,36 +119,46 @@ Resources:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
-        - Effect: Allow
-          Principal:
-            Service: lambda.amazonaws.com
-          Action: sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
       Policies:
-      - PolicyName: LambdaExecutionPolicy
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-          - Effect: Allow
-            Action: iam:ListAccountAliases
-            Resource: "*"
-          - Effect: Allow
-            Action: s3:GetObject
-            Resource:
-            - Fn::Sub: arn:aws:s3:::${pCurBucketName}
-            - Fn::Sub: arn:aws:s3:::${pCurBucketName}/*
-            - Fn::Sub: arn:aws:s3:::${pBillingBucketName}
-            - Fn::Sub: arn:aws:s3:::${pBillingBucketName}/*
-            - Fn::Sub: arn:aws:s3:::${pCloudTrailBucketName}
-            - Fn::Sub: arn:aws:s3:::${pCloudTrailBucketName}/*
-          - Effect: Allow
-            Action: logs:*
-            Resource: arn:aws:logs:*:*:*
-          - Effect: Allow
-            Action: lambda:InvokeFunction
-            Resource:
-            - arn:aws:lambda:*:*:function:rLambdaawsCreateAccountFunction
-            - arn:aws:lambda:*:*:function:rgetExternalIDFunction
-            - arn:aws:lambda:*:*:function:rLambdaAwsCredentialAccountFunction
+        - PolicyName: LambdaExecutionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: logs:CreateLogGroup
+                Resource: arn:aws:logs:*:*:*
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:log-group:/aws/lambda/*
+              - Effect: Allow
+                Action: iam:ListAccountAliases
+                Resource: '*'
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource:
+                  - Fn::Sub: arn:aws:s3:::${pCurBucketName}
+                  - Fn::Sub: arn:aws:s3:::${pCurBucketName}/*
+                  - Fn::Sub: arn:aws:s3:::${pBillingBucketName}
+                  - Fn::Sub: arn:aws:s3:::${pBillingBucketName}/*
+                  - Fn::Sub: arn:aws:s3:::${pCloudTrailBucketName}
+                  - Fn::Sub: arn:aws:s3:::${pCloudTrailBucketName}/*
+              - Effect: Allow
+                Action: logs:*
+                Resource: arn:aws:logs:*:*:*
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource:
+                  - arn:aws:lambda:*:*:function:rLambdaawsCreateAccountFunction
+                  - arn:aws:lambda:*:*:function:rgetExternalIDFunction
+                  - arn:aws:lambda:*:*:function:rLambdaAwsCredentialAccountFunction
+
+
 
   rLambdaawsCreateAccountFunction:
     DependsOn: rCopyZips
