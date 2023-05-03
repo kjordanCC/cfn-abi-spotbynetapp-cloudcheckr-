@@ -4,8 +4,8 @@ import boto3
 import urllib.request
 import urllib.parse
 import threading
-import cfnresponse
-
+import logging
+import cnfresponse
 
 def lambda_handler(event, context):
     timer = threading.Timer((context.get_remaining_time_in_millis() / 1000.00) - 0.5, timeout, args=[event, context])
@@ -32,14 +32,18 @@ def lambda_handler(event, context):
             print("sendResponse: ", sendResponse)
 
     except Exception as e:
+
         return {
             'statusCode': 500,
             'body': 'An error occurred during the Lambda execution: ' + str(e)
         }
     finally:
         timer.cancel()
-        cfnresponse.send(event, context, status, {}, None)
-
+        sendResponse = send_response(event, context, 'SUCCESS', {'accountNumber': response['accountId']})
+            print("sendResponse: ", sendResponse)
+def timeout(event, context):
+              logging.error('Execution is about to time out, sending failure response to CloudFormation')
+              cfnresponse.send(event, context, cfnresponse.FAILED, {}, None)
 
 def send_response(event, context, response_status, response_data):
     response_body = json.dumps({
