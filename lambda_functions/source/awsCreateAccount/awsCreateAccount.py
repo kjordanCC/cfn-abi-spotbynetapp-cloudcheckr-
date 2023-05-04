@@ -7,6 +7,7 @@ import threading
 import logging
 
 def lambda_handler(event, context):
+    response = {'accountId': None}
     timer = threading.Timer((context.get_remaining_time_in_millis() / 1000.00) - 0.5, timeout, args=[event, context])
     timer.start()
     try:
@@ -14,7 +15,7 @@ def lambda_handler(event, context):
         APISecret = event['ResourceProperties']['pAPISecret']
         customerNumber = event['ResourceProperties']['pCustomerNumber']
         if event['RequestType'] == 'Delete':
-            print("delete eventt")
+            send_response(event, context, 'SUCCESS', {'Message': 'Resource deletion completed'})
         else:
             account_aliases, account_number = get_account_name()
             print("test")
