@@ -23,7 +23,13 @@ def lambda_handler(event, context):
 
             bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
 
+            print("customerNumber:, ",customerNumber)
+            print("accountNumber:, ",accountNumber)
+            print("RoleArn:, ",RoleArn)
+            print("bearerToken:, ",bearerToken)
+
             response = credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken)
+            print("response for credentialAccount: ", response)
 
         
     except Exception as e:
