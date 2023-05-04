@@ -11,8 +11,8 @@ project:
 tests:
   sample:
     parameters:
-      pAPIKey: $[taskcat_getenv(MY_API_KEY)]
-      pAPISecret: $[taskcat_getenv(MY_API_SECRET)]
+      pAPIKey: '88e84dcd-f2dd-4dd0-96c0-113c86982992'
+      pAPISecret: '3TTeI5IaAFes!!!1lxq80h!Qh!8hpzP0'
       pBillingBucketName: 'billingbucket'
       pCloudTrailBucketName: 'cloudtrailbucket'
       pCurBucketName: 'curbucket'
