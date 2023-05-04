@@ -1,23 +1,47 @@
 import json
 import base64
+import boto3
 import urllib.request
 import urllib.parse
-
+import threading
+import logging
+import cfnresponse
 
 def lambda_handler(event, context):
-    resource_properties = event['ResourceProperties']
-    APIKey = resource_properties['pAPIKey']
-    APISecret = resource_properties['pAPISecret']
-    customerNumber = resource_properties['pCustomerNumber']
-    accountNumber = resource_properties['AccountNumber']
-    RoleArn = resource_properties['RoleArn']
+    timer = threading.Timer((context.get_remaining_time_in_millis() / 1000.00) - 0.5, timeout, args=[event, context])
+    timer.start()
+    try:
+        APIKey = event['ResourceProperties']['pAPIKey']
+        APISecret = event['ResourceProperties']['pAPISecret']
+        customerNumber = event['ResourceProperties']['pCustomerNumber']
+        if event['RequestType'] == 'Delete':
+            print("delete event")
+        else:
+            account_aliases, account_number = get_account_name()
+            print("test")
+            accountName = account_aliases[0] if account_aliases else account_number
+            print("accountName: ", accountName)
 
-    bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
+            bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
+            print("bearerToken: ", bearerToken)
 
-    response = credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken)
+            response = createAccount(customerNumber, accountName, bearerToken)
+            print("response: ", response)
 
-    send_response(event, context, 'SUCCESS', {})
-    return response
+            sendResponse = send_response(event, context, 'SUCCESS', {'accountNumber': response['accountId']})
+            print("sendResponse: ", sendResponse)
+
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': 'An error occurred during the Lambda execution: ' + str(e)
+        }
+    finally:
+        timer.cancel()
+
+def timeout(event, context):
+    logging.error('Execution is about to time out, sending failure response to CloudFormation')
+    cfnresponse.send(event, context, cfnresponse.FAILED, {}, None)
 
 
 def credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken):
