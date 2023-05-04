@@ -1,31 +1,49 @@
 import json
 import base64
-import boto3
 import urllib.request
 import urllib.parse
+import threading
+import logging
 
 
 def lambda_handler(event, context):
-    print("event: ", event)
-    print("context: ", context)
-    APIKey = event['ResourceProperties']['pAPIKey']
-    APISecret = event['ResourceProperties']['pAPISecret']
-    customerNumber = event['ResourceProperties']['pCustomerNumber']
-    accountNumber = event['ResourceProperties']['AccountNumber']
+    timer = threading.Timer((context.get_remaining_time_in_millis() / 1000.00) - 0.5, timeout, args=[event, context])
+    timer.start()
+    try:
+        print("event: ", event)
+        print("context: ", context)
+        APIKey = event['ResourceProperties']['pAPIKey']
+        APISecret = event['ResourceProperties']['pAPISecret']
+        customerNumber = event['ResourceProperties']['pCustomerNumber']
+        accountNumber = event['ResourceProperties']['AccountNumber']
 
-    print("getting token")
-    bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
+        print("getting token")
+        bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
     
 
-    response = getExternalID(customerNumber, accountNumber, bearerToken)
-    print("response: ", response)
+        response = getExternalID(customerNumber, accountNumber, bearerToken)
+        print("response: ", response)
 
-    response_data = {'externalAccount': response['awsAccountId'], 'ExternalId': response['externalIdValue']}
+        response_data = {'externalAccount': response['awsAccountId'], 'ExternalId': response['externalIdValue']}
+  
+    except Exception as e:
+        timer.cancel()
+        sendResponse = send_response(event, context, 'FAILED', {'Error': 'An error occurred during the Lambda execution: ' + str(e)})
+        print("sendResponse: ", sendResponse)
+        return {
+            'statusCode': 500,
+            'body': 'An error occurred during the Lambda execution: ' + str(e)
+        }
 
-    sendResponse = send_response(event, context, 'SUCCESS', response_data)
-    print("sendResponse: ", sendResponse)
+    finally:
+        timer.cancel()
+        sendResponse = send_response(event, context, 'SUCCESS', {'accountNumber': response['accountId']})
+        print("sendResponse: ", sendResponse)
+        return response_data
 
-    return response_data
+def timeout(event, context):
+    logging.error('Execution is about to time out, sending failure response to CloudFormation')
+    send_response(event, context, 'FAILED', {'Error': 'Execution is about to time out'})
 
 def send_response(event, context, response_status, response_data):
     response_body = json.dumps({

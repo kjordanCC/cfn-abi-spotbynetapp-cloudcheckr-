@@ -1,48 +1,45 @@
 import json
 import base64
-import boto3
 import urllib.request
 import urllib.parse
 import threading
 import logging
-import cfnresponse
+
 
 def lambda_handler(event, context):
     timer = threading.Timer((context.get_remaining_time_in_millis() / 1000.00) - 0.5, timeout, args=[event, context])
     timer.start()
     try:
-        APIKey = event['ResourceProperties']['pAPIKey']
-        APISecret = event['ResourceProperties']['pAPISecret']
-        customerNumber = event['ResourceProperties']['pCustomerNumber']
-        if event['RequestType'] == 'Delete':
-            print("delete event")
-        else:
-            account_aliases, account_number = get_account_name()
-            print("test")
-            accountName = account_aliases[0] if account_aliases else account_number
-            print("accountName: ", accountName)
+        resource_properties = event['ResourceProperties']
+        APIKey = resource_properties['pAPIKey']
+        APISecret = resource_properties['pAPISecret']
+        customerNumber = resource_properties['pCustomerNumber']
+        accountNumber = resource_properties['pAccountNumber']
+        RoleArn = resource_properties['RoleArn']
 
-            bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
-            print("bearerToken: ", bearerToken)
+        bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
 
-            response = createAccount(customerNumber, accountName, bearerToken)
-            print("response: ", response)
+        response = credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken)
 
-            sendResponse = send_response(event, context, 'SUCCESS', {'accountNumber': response['accountId']})
-            print("sendResponse: ", sendResponse)
-
+        
     except Exception as e:
+        timer.cancel()
+        sendResponse = send_response(event, context, 'FAILED', {'Error': 'An error occurred during the Lambda execution: ' + str(e)})
+        print("sendResponse: ", sendResponse)
         return {
             'statusCode': 500,
             'body': 'An error occurred during the Lambda execution: ' + str(e)
         }
+
     finally:
         timer.cancel()
+        sendResponse = send_response(event, context, 'SUCCESS', {'accountNumber': response['accountId']})
+        print("sendResponse: ", sendResponse)
+        return response
 
 def timeout(event, context):
     logging.error('Execution is about to time out, sending failure response to CloudFormation')
-    cfnresponse.send(event, context, cfnresponse.FAILED, {}, None)
-
+    send_response(event, context, 'FAILED', {'Error': 'Execution is about to time out'})
 
 def credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken):
     url = f"https://api-us.cloudcheckr.com/credential/v1/customers/{customerNumber}/accounts/{accountNumber}/credentials/aws"
