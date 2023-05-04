@@ -2,23 +2,44 @@ import json
 import base64
 import urllib.request
 import urllib.parse
+import threading
+import logging
 
 
 def lambda_handler(event, context):
-    resource_properties = event['ResourceProperties']
-    APIKey = resource_properties['pAPIKey']
-    APISecret = resource_properties['pAPISecret']
-    customerNumber = resource_properties['pCustomerNumber']
-    accountNumber = resource_properties['AccountNumber']
-    RoleArn = resource_properties['RoleArn']
+    timer = threading.Timer((context.get_remaining_time_in_millis() / 1000.00) - 0.5, timeout, args=[event, context])
+    timer.start()
+    try:
+        resource_properties = event['ResourceProperties']
+        APIKey = resource_properties['pAPIKey']
+        APISecret = resource_properties['pAPISecret']
+        customerNumber = resource_properties['pCustomerNumber']
+        accountNumber = resource_properties['pAccountNumber']
+        RoleArn = resource_properties['RoleArn']
 
-    bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
+        bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
 
-    response = credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken)
+        response = credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken)
 
-    send_response(event, context, 'SUCCESS', {})
-    return response
+        
+    except Exception as e:
+        timer.cancel()
+        sendResponse = send_response(event, context, 'FAILED', {'Error': 'An error occurred during the Lambda execution: ' + str(e)})
+        print("sendResponse: ", sendResponse)
+        return {
+            'statusCode': 500,
+            'body': 'An error occurred during the Lambda execution: ' + str(e)
+        }
 
+    finally:
+        timer.cancel()
+        sendResponse = send_response(event, context, 'SUCCESS', {'accountNumber': response['accountId']})
+        print("sendResponse: ", sendResponse)
+        return response
+
+def timeout(event, context):
+    logging.error('Execution is about to time out, sending failure response to CloudFormation')
+    send_response(event, context, 'FAILED', {'Error': 'Execution is about to time out'})
 
 def credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken):
     url = f"https://api-us.cloudcheckr.com/credential/v1/customers/{customerNumber}/accounts/{accountNumber}/credentials/aws"

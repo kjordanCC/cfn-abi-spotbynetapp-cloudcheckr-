@@ -5,7 +5,6 @@ import urllib.request
 import urllib.parse
 import threading
 import logging
-import cnfresponse
 
 def lambda_handler(event, context):
     timer = threading.Timer((context.get_remaining_time_in_millis() / 1000.00) - 0.5, timeout, args=[event, context])
@@ -15,7 +14,7 @@ def lambda_handler(event, context):
         APISecret = event['ResourceProperties']['pAPISecret']
         customerNumber = event['ResourceProperties']['pCustomerNumber']
         if event['RequestType'] == 'Delete':
-            print("delete event")
+            print("delete eventt")
         else:
             account_aliases, account_number = get_account_name()
             print("test")
@@ -28,22 +27,24 @@ def lambda_handler(event, context):
             response = createAccount(customerNumber, accountName, bearerToken)
             print("response: ", response)
 
-            sendResponse = send_response(event, context, 'SUCCESS', {'accountNumber': response['accountId']})
-            print("sendResponse: ", sendResponse)
-
     except Exception as e:
-
+        timer.cancel()
+        sendResponse = send_response(event, context, 'FAILED', {'Error': 'An error occurred during the Lambda execution: ' + str(e)})
+        print("sendResponse: ", sendResponse)
         return {
             'statusCode': 500,
             'body': 'An error occurred during the Lambda execution: ' + str(e)
         }
+
     finally:
         timer.cancel()
         sendResponse = send_response(event, context, 'SUCCESS', {'accountNumber': response['accountId']})
-            print("sendResponse: ", sendResponse)
+        print("sendResponse: ", sendResponse)
+
 def timeout(event, context):
-              logging.error('Execution is about to time out, sending failure response to CloudFormation')
-              cfnresponse.send(event, context, cfnresponse.FAILED, {}, None)
+    logging.error('Execution is about to time out, sending failure response to CloudFormation')
+    send_response(event, context, 'FAILED', {'Error': 'Execution is about to time out'})
+
 
 def send_response(event, context, response_status, response_data):
     response_body = json.dumps({
@@ -111,8 +112,8 @@ def get_access_token(url, client_id, client_secret):
         method='POST'
     )
 
-    response = urllib.request.urlopen(req)
-    response_json = json.loads(response.read().decode())
+    with urllib.request.urlopen(req) as response:
+        response_json = json.loads(response.read().decode())
     return response_json["access_token"]
 
 def get_account_name():
