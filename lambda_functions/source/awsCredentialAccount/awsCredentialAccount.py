@@ -18,24 +18,18 @@ def lambda_handler(event, context):
             APIKey = resource_properties['pAPIKey']
             APISecret = resource_properties['pAPISecret']
             customerNumber = resource_properties['pCustomerNumber']
-            accountNumber = resource_properties['pAccountNumber']
+            accountNumber = resource_properties['AccountNumber']
             RoleArn = resource_properties['RoleArn']
-
             bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
 
-            print("customerNumber:, ",customerNumber)
-            print("accountNumber:, ",accountNumber)
-            print("RoleArn:, ",RoleArn)
-            print("bearerToken:, ",bearerToken)
+
 
             response = credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken)
-            print("response for credentialAccount: ", response)
 
         
     except Exception as e:
         timer.cancel()
         sendResponse = send_response(event, context, 'FAILED', {'Error': 'An error occurred during the Lambda execution: ' + str(e)})
-        print("sendResponse: ", sendResponse)
         return {
             'statusCode': 500,
             'body': 'An error occurred during the Lambda execution: ' + str(e)
@@ -44,7 +38,6 @@ def lambda_handler(event, context):
     finally:
         timer.cancel()
         sendResponse = send_response(event, context, 'SUCCESS', {'Success': response})
-        print("sendResponse: ", sendResponse)
         return response
 
 def timeout(event, context):

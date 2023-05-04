@@ -11,14 +11,14 @@ project:
 tests:
   sample:
     parameters:
-      pAPIKey: '88e84dcd-f2dd-4dd0-96c0-113c86982992'
-      pAPISecret: '3TTeI5IaAFes!!!1lxq80h!Qh!8hpzP0'
-      pBillingBucketName: 'billingbucket'
-      pCloudTrailBucketName: 'cloudtrailbucket'
-      pCurBucketName: 'curbucket'
-      pCustomerNumber: '54687'
-      pSRASourceS3BucketName: 'kurtspublicbucket'
-      pSRAStagingS3Key: 'cfn-abi-spotbynetapp-cloudcheckr'
+      pAPIKey: $[taskcat_ssm_/cloudcheckr/api_key]
+      pAPISecret: $[taskcat_ssm_/cloudcheckr/api_secret]
+      pSRASourceS3BucketName: $[taskcat_autobucket]
+      pSRAStagingS3Key: $[taskcat_project_name]
+      pBillingBucketName: $[taskcat_ssm_/cloudcheckr/billing_bucket_name]
+      pCloudTrailBucketName: $[taskcat_ssm_/cloudcheckr/cloudtrail_bucket_name]
+      pCurBucketName: $[taskcat_ssm_/cloudcheckr/cur_bucket_name]
+      pCustomerNumber: $[taskcat_ssm_/cloudcheckr/customer_number]
 
 
       

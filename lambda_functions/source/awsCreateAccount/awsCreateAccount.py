@@ -12,32 +12,22 @@ def lambda_handler(event, context):
     timer.start()
     try:
         APIKey = event['ResourceProperties']['pAPIKey']
-        print("APIKey: ", APIKey)
         APISecret = event['ResourceProperties']['pAPISecret']
-        print("APISecret: ", APISecret)
         customerNumber = event['ResourceProperties']['pCustomerNumber']
-        print("customerNumber: ", customerNumber)
 
-        print("event type: ", event['RequestType'])
         if event['RequestType'] == 'Delete':
             send_response(event, context, 'SUCCESS', {'Message': 'Resource deletion completed'})
         else:
             account_aliases, account_number = get_account_name()
-            print("test")
             accountName = account_aliases[0] if account_aliases else account_number
-            print("accountName: ", accountName)
 
             bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
-            print("bearerToken: ", bearerToken)
-          
-
+        
             response = createAccount(customerNumber, accountName, bearerToken)
-            print("response: ", response)
 
     except Exception as e:
         timer.cancel()
         sendResponse = send_response(event, context, 'FAILED', {'Error': 'An error occurred during the Lambda execution: ' + str(e)})
-        print("sendResponse: ", sendResponse)
         return {
             'statusCode': 500,
             'body': 'An error occurred during the Lambda execution: ' + str(e)
@@ -46,7 +36,6 @@ def lambda_handler(event, context):
     finally:
         timer.cancel()
         sendResponse = send_response(event, context, 'SUCCESS', {'accountNumber': response['accountId']})
-        print("sendResponse: ", sendResponse)
 
 def timeout(event, context):
     logging.error('Execution is about to time out, sending failure response to CloudFormation')

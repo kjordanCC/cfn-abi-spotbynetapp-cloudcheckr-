@@ -11,8 +11,6 @@ def lambda_handler(event, context):
     timer.start()
     response_data = {'externalAccount': None, 'ExternalId': None}
     try:
-        print("event: ", event)
-        print("context: ", context)
         APIKey = event['ResourceProperties']['pAPIKey']
         APISecret = event['ResourceProperties']['pAPISecret']
         customerNumber = event['ResourceProperties']['pCustomerNumber']
@@ -25,14 +23,12 @@ def lambda_handler(event, context):
  
             response = getExternalID(customerNumber, accountNumber, bearerToken)
 
-            print("response of getExternalID: ", response)
 
             response_data = {'externalAccount': response['awsAccountId'], 'ExternalId': response['externalIdValue']}
   
     except Exception as e:
         timer.cancel()
         sendResponse = send_response(event, context, 'FAILED', {'Error': 'An error occurred during the Lambda execution: ' + str(e)})
-        print("sendResponse: ", sendResponse)
         return {
             'statusCode': 500,
             'body': 'An error occurred during the Lambda execution: ' + str(e)
@@ -41,7 +37,6 @@ def lambda_handler(event, context):
     finally:
         timer.cancel()
         sendResponse = send_response(event, context, 'SUCCESS', response_data)
-        print("sendResponse: ", sendResponse)
         return response_data
 
 def timeout(event, context):
@@ -75,7 +70,6 @@ def send_response(event, context, response_status, response_data):
 def getExternalID(customerNumber, accountNumber, bearerToken):
     region = "Commercial"
     url = "https://api-us.cloudcheckr.com/credential/v1/customers/"+str(customerNumber)+"/accounts/"+str(accountNumber)+"/external-id/aws/"+region
-    print("url: ", url)
     headers = {
         'Accept': 'text/plain',
         'Content-Type': 'application/json',
@@ -88,7 +82,6 @@ def getExternalID(customerNumber, accountNumber, bearerToken):
         timeout=15)
     
     response_text = response.read().decode()
-    print("response within getExternalID: ", response_text)
 
     # Extract the ID from the response
     response_json = json.loads(response_text)
