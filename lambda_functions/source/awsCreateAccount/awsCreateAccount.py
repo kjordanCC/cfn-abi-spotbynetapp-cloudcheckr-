@@ -14,7 +14,7 @@ def lambda_handler(event, context):
         APISecret = event['ResourceProperties']['pAPISecret']
         customerNumber = event['ResourceProperties']['pCustomerNumber']
         if event['RequestType'] == 'Delete':
-            print("delete event")
+            print("delete eventt")
         else:
             account_aliases, account_number = get_account_name()
             print("test")
