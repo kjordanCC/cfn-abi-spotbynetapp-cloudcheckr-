@@ -9,6 +9,7 @@ import logging
 def lambda_handler(event, context):
     timer = threading.Timer((context.get_remaining_time_in_millis() / 1000.00) - 0.5, timeout, args=[event, context])
     timer.start()
+    response_data = {'externalAccount': None, 'ExternalId': None}
     try:
         print("event: ", event)
         print("context: ", context)
@@ -16,15 +17,17 @@ def lambda_handler(event, context):
         APISecret = event['ResourceProperties']['pAPISecret']
         customerNumber = event['ResourceProperties']['pCustomerNumber']
         accountNumber = event['ResourceProperties']['AccountNumber']
+        if event['RequestType'] == 'Delete':
+            send_response(event, context, 'SUCCESS', {'Message': 'Resource deletion completed'})
+        else:
+            print("getting token")
+            bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
+ 
+            response = getExternalID(customerNumber, accountNumber, bearerToken)
 
-        print("getting token")
-        bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
-    
+            print("response: ", response)
 
-        response = getExternalID(customerNumber, accountNumber, bearerToken)
-        print("response: ", response)
-
-        response_data = {'externalAccount': response['awsAccountId'], 'ExternalId': response['externalIdValue']}
+            response_data = {'externalAccount': response['awsAccountId'], 'ExternalId': response['externalIdValue']}
   
     except Exception as e:
         timer.cancel()
@@ -37,7 +40,7 @@ def lambda_handler(event, context):
 
     finally:
         timer.cancel()
-        sendResponse = send_response(event, context, 'SUCCESS', {'accountNumber': response['accountId']})
+        sendResponse = send_response(event, context, 'SUCCESS', {'response_data': response_data})
         print("sendResponse: ", sendResponse)
         return response_data
 
