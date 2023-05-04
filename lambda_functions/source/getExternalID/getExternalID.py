@@ -25,7 +25,7 @@ def lambda_handler(event, context):
  
             response = getExternalID(customerNumber, accountNumber, bearerToken)
 
-            print("response: ", response)
+            print("response of getExternalID: ", response)
 
             response_data = {'externalAccount': response['awsAccountId'], 'ExternalId': response['externalIdValue']}
   
@@ -88,7 +88,7 @@ def getExternalID(customerNumber, accountNumber, bearerToken):
         timeout=15)
     
     response_text = response.read().decode()
-    print("response: ", response_text)
+    print("response within getExternalID: ", response_text)
 
     # Extract the ID from the response
     response_json = json.loads(response_text)
