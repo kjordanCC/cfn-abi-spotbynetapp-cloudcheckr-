@@ -12,8 +12,13 @@ def lambda_handler(event, context):
     timer.start()
     try:
         APIKey = event['ResourceProperties']['pAPIKey']
+        print("APIKey: ", APIKey)
         APISecret = event['ResourceProperties']['pAPISecret']
+        print("APISecret: ", APISecret)
         customerNumber = event['ResourceProperties']['pCustomerNumber']
+        print("customerNumber: ", customerNumber)
+
+        print("event type: ", event['RequestType'])
         if event['RequestType'] == 'Delete':
             send_response(event, context, 'SUCCESS', {'Message': 'Resource deletion completed'})
         else:
@@ -24,6 +29,7 @@ def lambda_handler(event, context):
 
             bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
             print("bearerToken: ", bearerToken)
+          
 
             response = createAccount(customerNumber, accountName, bearerToken)
             print("response: ", response)
