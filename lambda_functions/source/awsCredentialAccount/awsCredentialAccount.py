@@ -7,19 +7,23 @@ import logging
 
 
 def lambda_handler(event, context):
+    response = None
     timer = threading.Timer((context.get_remaining_time_in_millis() / 1000.00) - 0.5, timeout, args=[event, context])
     timer.start()
     try:
-        resource_properties = event['ResourceProperties']
-        APIKey = resource_properties['pAPIKey']
-        APISecret = resource_properties['pAPISecret']
-        customerNumber = resource_properties['pCustomerNumber']
-        accountNumber = resource_properties['pAccountNumber']
-        RoleArn = resource_properties['RoleArn']
+        if event['RequestType'] == 'Delete':
+            send_response(event, context, 'SUCCESS', {'Message': 'Resource deletion completed'})
+        else:
+            resource_properties = event['ResourceProperties']
+            APIKey = resource_properties['pAPIKey']
+            APISecret = resource_properties['pAPISecret']
+            customerNumber = resource_properties['pCustomerNumber']
+            accountNumber = resource_properties['pAccountNumber']
+            RoleArn = resource_properties['RoleArn']
 
-        bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
+            bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
 
-        response = credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken)
+            response = credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken)
 
         
     except Exception as e:
@@ -33,7 +37,7 @@ def lambda_handler(event, context):
 
     finally:
         timer.cancel()
-        sendResponse = send_response(event, context, 'SUCCESS', {'accountNumber': response['accountId']})
+        sendResponse = send_response(event, context, 'SUCCESS', {'Success': response})
         print("sendResponse: ", sendResponse)
         return response
 
