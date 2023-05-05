@@ -16,15 +16,15 @@ Parameters:
     Type: String
     Description: Customer Number
   pCurBucketName:
-    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    AllowedPattern: ^(?!$)[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$|^$
     Type: String
     Description: Name of the S3 bucket for CUR data
   pBillingBucketName:
-    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    AllowedPattern: ^(?!$)[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$|^$
     Type: String
     Description: Name of the S3 bucket for billing data
   pCloudTrailBucketName:
-    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    AllowedPattern: ^(?!$)[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$|^$
     Type: String
     Description: Name of the S3 bucket for CloudTrail logs
   pSRAStagingS3Key:
