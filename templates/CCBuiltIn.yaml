@@ -312,7 +312,6 @@ Resources:
       MemorySize: 128
   rCustomResourceAwsCredentialAccountInvoke:
     Type: Custom::LambdaInvoke
-    DependsOn: rdeployIAMstack
     Properties:
       ServiceToken:
         Fn::GetAtt:
