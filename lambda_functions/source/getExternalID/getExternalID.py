@@ -1,3 +1,8 @@
+########################################################################
+# Copyright NetApp, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+########################################################################
+
 import json
 import base64
 import urllib.request

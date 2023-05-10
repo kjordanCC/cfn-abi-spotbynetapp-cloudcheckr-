@@ -1,3 +1,8 @@
+########################################################################
+# Copyright NetApp, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+########################################################################
+
 ---
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Automation of building IAM Role and credentialing against CloudCheckr
@@ -27,14 +32,18 @@ Parameters:
     AllowedPattern: ^(?!$)[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$|^$
     Type: String
     Description: Name of the S3 bucket for CloudTrail logs
-  pSRAStagingS3Key:
+  pABIStagingS3Key:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     Type: String
     Default: cfn-abi-spotbynetapp-cloudcheckr
-  pSRASourceS3BucketName:
+  pABISourceS3BucketName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     Type: String
     Default: aws-abi-pilot
+  pABIS3BucketRegion:
+    AllowedPattern: ^[a-z][a-z]-[a-z]*-[0-9]*$
+    Type: String
+    Default: us-east-1
 
 Resources:
   rABIStagingS3Bucket:
@@ -51,7 +60,7 @@ Resources:
           - id: CKV_AWS_18
             comment: S3 access logs intentionally not enabled
     Properties:
-      BucketName: !Sub ${pSRAStagingS3Key}-${AWS::AccountId}-${AWS::Region}
+      BucketName: !Sub ${pABIStagingS3Key}-${AWS::AccountId}-${AWS::Region}
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
@@ -66,7 +75,7 @@ Resources:
         RestrictPublicBuckets: True
       Tags:
         - Key: abi-solution
-          Value: !Ref pSRAStagingS3Key
+          Value: !Ref pABIStagingS3Key
       VersioningConfiguration:
         Status: Enabled
   rABIStagingS3BucketPolicy:
@@ -142,12 +151,12 @@ Resources:
               - Effect: Allow
                 Action: s3:GetObject
                 Resource:
-                  - Fn::Sub: arn:aws:s3:::${pCurBucketName}
-                  - Fn::Sub: arn:aws:s3:::${pCurBucketName}/*
-                  - Fn::Sub: arn:aws:s3:::${pBillingBucketName}
-                  - Fn::Sub: arn:aws:s3:::${pBillingBucketName}/*
-                  - Fn::Sub: arn:aws:s3:::${pCloudTrailBucketName}
-                  - Fn::Sub: arn:aws:s3:::${pCloudTrailBucketName}/*
+                  - Fn::Sub: arn${AWS::Partition}s3:::${pCurBucketName}
+                  - Fn::Sub: arn${AWS::Partition}s3:::${pCurBucketName}/*
+                  - Fn::Sub: arn${AWS::Partition}s3:::${pBillingBucketName}
+                  - Fn::Sub: arn${AWS::Partition}s3:::${pBillingBucketName}/*
+                  - Fn::Sub: arn${AWS::Partition}s3:::${pCloudTrailBucketName}
+                  - Fn::Sub: arn${AWS::Partition}s3:::${pCloudTrailBucketName}/*
               - Effect: Allow
                 Action: logs:*
                 Resource: arn:aws:logs:*:*:*
@@ -190,8 +199,8 @@ Resources:
         - rLambdaExecutionRole
         - Arn
       Code:
-        S3Bucket: !Ref pSRASourceS3BucketName
-        S3Key: !Sub ${pSRAStagingS3Key}/lambda_functions/packages/awsCreateAccount/awsCreateAccount.zip
+        S3Bucket: !Ref pABISourceS3BucketName
+        S3Key: !Sub ${pABIStagingS3Key}/lambda_functions/packages/awsCreateAccount/lambda.zip
       Runtime: python3.8
       Timeout: 300
       MemorySize: 128
@@ -238,8 +247,8 @@ Resources:
         - rLambdaExecutionRole
         - Arn
       Code:
-        S3Bucket: !Ref pSRASourceS3BucketName
-        S3Key: !Sub ${pSRAStagingS3Key}/lambda_functions/packages/getExternalID/getExternalID.zip
+        S3Bucket: !Ref pABISourceS3BucketName
+        S3Key: !Sub ${pABIStagingS3Key}/lambda_functions/packages/getExternalID/lambda.zip
       Runtime: python3.8
       Timeout: 300
       MemorySize: 128
@@ -263,7 +272,7 @@ Resources:
   rdeployIAMstack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3.amazonaws.com/cf-cc-4172017/cc_aws_cfn_iam_stack.template.json
+      TemplateURL:  !Sub https://${rABIStagingS3Bucket}.s3.${pABIS3BucketRegion}.${AWS::URLSuffix}/${pABIStagingS3KeyPrefix}/templates/cciamrole/cc_aws_cfn_iam_stack.template.json
       Parameters:
         ExternalId:
           Fn::GetAtt:
@@ -305,8 +314,8 @@ Resources:
         - rLambdaExecutionRole
         - Arn
       Code:
-        S3Bucket: !Ref pSRASourceS3BucketName
-        S3Key: !Sub ${pSRAStagingS3Key}/lambda_functions/packages/awsCredentialAccount/awsCredentialAccount.zip
+        S3Bucket: !Ref pABISourceS3BucketName
+        S3Key: !Sub ${pABIStagingS3Key}/lambda_functions/packages/awsCredentialAccount/lambda.zip
       Runtime: python3.8
       Timeout: 300
       MemorySize: 128
@@ -336,14 +345,15 @@ Resources:
     Type: Custom::CopyZips
     Properties:
       ServiceToken: !GetAtt 'rCopyZipsFunction.Arn'
-      SourceBucket: !Ref 'pSRASourceS3BucketName'
+      SourceBucket: !Ref 'pABISourceS3BucketName'
       DestBucket: !Ref 'rABIStagingS3Bucket'
-      Prefix: !Sub ${pSRAStagingS3Key}/
+      Prefix: !Sub ${pABIStagingS3Key}/
       Objects:
-        - lambda_functions/packages/awsCreateAccount/awsCreateAccount.zip
-        - lambda_functions/packages/awsCredentialAccount/awsCredentialAccount.zip
-        - lambda_functions/packages/getExternalID/getExternalID.zip
-#        - templates/enable_integrations/partner1-enable-integrations.yaml
+        - lambda_functions/packages/awsCreateAccount/lambda.zip
+        - lambda_functions/packages/awsCredentialAccount/lambda.zip
+        - lambda_functions/packages/getExternalID/lambda.zip
+        - templates/CCBuiltIn.yaml
+        - templates/cciamrole/cc_aws_cfn_iam_stack.template.json
 
   rCopyZipsRole:
     Type: AWS::IAM::Role
@@ -368,8 +378,8 @@ Resources:
                   - s3:GetObject
                   - s3:GetObjectTagging
                 Resource:
-                  - !Sub 'arn:${AWS::Partition}:s3:::${pSRASourceS3BucketName}/'
-                  - !Sub 'arn:${AWS::Partition}:s3:::${pSRASourceS3BucketName}/${pSRAStagingS3Key}/*'
+                  - !Sub 'arn:${AWS::Partition}:s3:::${pABISourceS3BucketName}/'
+                  - !Sub 'arn:${AWS::Partition}:s3:::${pABISourceS3BucketName}/${pABIStagingS3Key}/*'
               - Effect: Allow
                 Action:
                   - s3:PutObject
@@ -377,7 +387,7 @@ Resources:
                   - s3:PutObjectTagging
                 Resource:
                   - !Sub 'arn:${AWS::Partition}:s3:::${rABIStagingS3Bucket}/'
-                  - !Sub 'arn:${AWS::Partition}:s3:::${rABIStagingS3Bucket}/${pSRAStagingS3Key}/*'
+                  - !Sub 'arn:${AWS::Partition}:s3:::${rABIStagingS3Bucket}/${pABIStagingS3Key}/*'
               - Effect: Allow
                 Action:
                   - s3:ListAllMyBuckets
