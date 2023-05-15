@@ -272,7 +272,7 @@ Resources:
   rdeployIAMstack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL:  !Sub https://${rABIStagingS3Bucket}.s3.${pABIS3BucketRegion}.${AWS::URLSuffix}/${pABIStagingS3KeyPrefix}/templates/cciamrole/cc_aws_cfn_iam_stack.template.json
+      TemplateURL:  !Sub https://${rABIStagingS3Bucket}.s3.${pABIS3BucketRegion}.${AWS::URLSuffix}/${pABIStagingS3Key}/templates/cciamrole/cc_aws_cfn_iam_stack.template.json
       Parameters:
         ExternalId:
           Fn::GetAtt:
@@ -340,6 +340,8 @@ Resources:
         Fn::GetAtt:
         - rdeployIAMstack
         - Outputs.RoleArn
+
+
 
   rCopyZips:
     Type: Custom::CopyZips
