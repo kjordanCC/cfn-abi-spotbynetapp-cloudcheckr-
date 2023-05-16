@@ -151,12 +151,12 @@ Resources:
               - Effect: Allow
                 Action: s3:GetObject
                 Resource:
-                  - Fn::Sub: arn${AWS::Partition}s3:::${pCurBucketName}
-                  - Fn::Sub: arn${AWS::Partition}s3:::${pCurBucketName}/*
-                  - Fn::Sub: arn${AWS::Partition}s3:::${pBillingBucketName}
-                  - Fn::Sub: arn${AWS::Partition}s3:::${pBillingBucketName}/*
-                  - Fn::Sub: arn${AWS::Partition}s3:::${pCloudTrailBucketName}
-                  - Fn::Sub: arn${AWS::Partition}s3:::${pCloudTrailBucketName}/*
+                  - Fn::Sub: arn:${AWS::Partition}:s3:::${pCurBucketName}
+                  - Fn::Sub: arn:${AWS::Partition}:s3:::${pCurBucketName}/*
+                  - Fn::Sub: arn:${AWS::Partition}:s3:::${pBillingBucketName}
+                  - Fn::Sub: arn:${AWS::Partition}:s3:::${pBillingBucketName}/*
+                  - Fn::Sub: arn:${AWS::Partition}:s3:::${pCloudTrailBucketName}
+                  - Fn::Sub: arn:${AWS::Partition}:s3:::${pCloudTrailBucketName}/*
               - Effect: Allow
                 Action: logs:*
                 Resource: arn:aws:logs:*:*:*
