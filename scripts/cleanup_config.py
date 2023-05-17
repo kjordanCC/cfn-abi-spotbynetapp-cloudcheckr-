@@ -315,4 +315,6 @@ if __name__ == '__main__':
             elif item['Type'] == 'LOG_GROUP':
                 delete_cw_logs(filters=item['Filter'])
             else:
+
                 print('Invalid type in cleanup_config.json: %s', item['Type'])
+
