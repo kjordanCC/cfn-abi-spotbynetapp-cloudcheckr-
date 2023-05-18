@@ -23,7 +23,6 @@ def lambda_handler(event, context):
         if event['RequestType'] == 'Delete':
             send_response(event, context, 'SUCCESS', {'Message': 'Resource deletion completed'})
         else:
-            print("getting token")
             bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
  
             response = getExternalID(customerNumber, accountNumber, bearerToken)
@@ -33,7 +32,7 @@ def lambda_handler(event, context):
   
     except Exception as e:
         timer.cancel()
-        sendResponse = send_response(event, context, 'FAILED', {'Error': 'An error occurred during the Lambda execution: ' + str(e)})
+        send_response(event, context, 'FAILED', {'Error': 'An error occurred during the Lambda execution: ' + str(e)})
         return {
             'statusCode': 500,
             'body': 'An error occurred during the Lambda execution: ' + str(e)
@@ -41,7 +40,7 @@ def lambda_handler(event, context):
 
     finally:
         timer.cancel()
-        sendResponse = send_response(event, context, 'SUCCESS', response_data)
+        send_response(event, context, 'SUCCESS', response_data)
         return response_data
 
 def timeout(event, context):
