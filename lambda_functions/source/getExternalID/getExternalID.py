@@ -32,7 +32,7 @@ def lambda_handler(event, context):
   
     except Exception as e:
         timer.cancel()
-        send_response(event, context, 'FAILED', {'Error': 'An error occurred during the Lambda execution: ' + str(e)})
+        sendResponse = send_response(event, context, 'FAILED', {'Error': 'An error occurred during the Lambda execution: ' + str(e)})
         return {
             'statusCode': 500,
             'body': 'An error occurred during the Lambda execution: ' + str(e)
@@ -40,7 +40,7 @@ def lambda_handler(event, context):
 
     finally:
         timer.cancel()
-        send_response(event, context, 'SUCCESS', response_data)
+        sendResponse = send_response(event, context, 'SUCCESS', response_data)
         return response_data
 
 def timeout(event, context):
