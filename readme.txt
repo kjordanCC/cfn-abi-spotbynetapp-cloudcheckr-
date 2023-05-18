@@ -1,4 +1,4 @@
-# README
+# README 
 
 This ABI is designed to automate the process of configuring and credentialing CloudCheckr for customers/partners once purchased from the AWS marketplace. This automation includes building an IAM Role, generating and credentialing an AWS account in CloudCheckr, as well as setting up required resources such as S3 buckets, Lambda functions, and CloudFormation stacks etc.
 Using this ABI, CloudCheckr customers can monitor their environment for CloudWatch events automatically and efficiently, as well as access other valuable cloud management features within CloudCheckr. 
@@ -46,8 +46,8 @@ The template includes the following parameters:
 - `pBillingBucketName`: The name of the S3 bucket for billing data.
 - `pCloudTrailBucketName`: The name of the S3 bucket for CloudTrail logs.
 - `pSRAStagingS3Key`: The S3 key for staging resources. Default value: `cfn-abi-spotbynetapp-cloudcheckr`. (we suggest leaving the default)
-
 - `pSRASourceS3BucketName`: The name of the source S3 bucket for Lambda function packages. Default value: `aws-abi-pilot`. (we suggest leaving the default)
+
 ## Resources
 
 The CloudFormation template creates the following resources:
