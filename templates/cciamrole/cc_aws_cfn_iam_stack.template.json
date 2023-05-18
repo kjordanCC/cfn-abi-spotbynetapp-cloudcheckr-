@@ -2,49 +2,57 @@
 
 	"AWSTemplateFormatVersion": "2010-09-09",
 
-	"Metadata":{
+	"Metadata": {
+		"cfn_nag": {
+			"rules_to_suppress": [
+				{
+					"id": "W11",
+					"reason": "* required for listing all resources for monitoring within cloudcheckr"
+				}
+			]
+		},
 
-		"AWS::CloudFormation::Interface":{
+		"AWS::CloudFormation::Interface": {
 
-			"ParameterGroups":[
+			"ParameterGroups": [
 
 				{
 
-					"Label":{"default":"IAM Role"},
+					"Label": { "default": "IAM Role" },
 
-					"Parameters":["ExternalAccount","ExternalId", "AccountType"]
+					"Parameters": [ "ExternalAccount", "ExternalId", "AccountType" ]
 
 				},
 
 				{
 
-					"Label":{"default":"Inventory"},
+					"Label": { "default": "Inventory" },
 
-					"Parameters":["InventoryAndUtilzation"]
-
-				},
-
-				{
-
-					"Label":{"default":"Billing"},
-
-					"Parameters":["CostPermissions","BillingBucket", "CurBucket"]
+					"Parameters": [ "InventoryAndUtilzation" ]
 
 				},
 
 				{
 
-					"Label":{"default":"Security"},
+					"Label": { "default": "Billing" },
 
-					"Parameters":["Security","CloudTrailBucket"]
+					"Parameters": [ "CostPermissions", "BillingBucket", "CurBucket" ]
 
 				},
 
 				{
 
-					"Label":{"default":"CloudWatch Flow Logs"},
+					"Label": { "default": "Security" },
 
-					"Parameters":["CloudWatchFlowLogs"]
+					"Parameters": [ "Security", "CloudTrailBucket" ]
+
+				},
+
+				{
+
+					"Label": { "default": "CloudWatch Flow Logs" },
+
+					"Parameters": [ "CloudWatchFlowLogs" ]
 
 				}
 
