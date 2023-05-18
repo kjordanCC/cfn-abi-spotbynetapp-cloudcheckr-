@@ -201,7 +201,7 @@ Resources:
       Code:
         S3Bucket: !Ref pABISourceS3BucketName
         S3Key: !Sub ${pABIStagingS3Key}/lambda_functions/packages/awsCreateAccount/lambda.zip
-      Runtime: python3.8
+      Runtime: python3.10
       Timeout: 300
       MemorySize: 128
   rCustomResourceAwsCreateAccountInvoke:
@@ -249,7 +249,7 @@ Resources:
       Code:
         S3Bucket: !Ref pABISourceS3BucketName
         S3Key: !Sub ${pABIStagingS3Key}/lambda_functions/packages/getExternalID/lambda.zip
-      Runtime: python3.8
+      Runtime: python3.10
       Timeout: 300
       MemorySize: 128
   rCustomResourceGetExternalIDInvoke:
@@ -316,7 +316,7 @@ Resources:
       Code:
         S3Bucket: !Ref pABISourceS3BucketName
         S3Key: !Sub ${pABIStagingS3Key}/lambda_functions/packages/awsCredentialAccount/lambda.zip
-      Runtime: python3.8
+      Runtime: python3.10
       Timeout: 300
       MemorySize: 128
   rCustomResourceAwsCredentialAccountInvoke:
@@ -355,7 +355,7 @@ Resources:
         - lambda_functions/packages/awsCredentialAccount/lambda.zip
         - lambda_functions/packages/getExternalID/lambda.zip
         - templates/CCBuiltIn.yaml
-        - templates/cciamrole/cc_aws_cfn_iam_stack.template.json
+        - templates/cciamrole/cc_aws_cfn_iam_stack.template.json 
 
   rCopyZipsRole:
     Type: AWS::IAM::Role
@@ -417,7 +417,7 @@ Resources:
     Properties:
       Description: Copies objects from a source S3 bucket to a destination
       Handler: index.handler
-      Runtime: python3.9
+      Runtime: python3.10
       MemorySize: 128
       Role: !GetAtt 'rCopyZipsRole.Arn'
       Timeout: 240

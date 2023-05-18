@@ -25,14 +25,14 @@ def lambda_handler(event, context):
         else:
             bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
  
-            response = getExternalID(customerNumber, accountNumber, bearerToken)
+            response = getExternalID(customerNumber, accountNumber, bearerToken) 
 
 
             response_data = {'externalAccount': response['awsAccountId'], 'ExternalId': response['externalIdValue']}
   
     except Exception as e:
         timer.cancel()
-        send_response(event, context, 'FAILED', {'Error': 'An error occurred during the Lambda execution: ' + str(e)})
+        sendResponse = send_response(event, context, 'FAILED', {'Error': 'An error occurred during the Lambda execution: ' + str(e)})
         return {
             'statusCode': 500,
             'body': 'An error occurred during the Lambda execution: ' + str(e)
@@ -40,7 +40,7 @@ def lambda_handler(event, context):
 
     finally:
         timer.cancel()
-        send_response(event, context, 'SUCCESS', response_data)
+        sendResponse = send_response(event, context, 'SUCCESS', response_data)
         return response_data
 
 def timeout(event, context):
