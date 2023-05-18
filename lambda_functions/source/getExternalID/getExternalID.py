@@ -25,7 +25,7 @@ def lambda_handler(event, context):
         else:
             bearerToken = get_access_token("https://auth-us.cloudcheckr.com/auth/connect/token", APIKey, APISecret)
  
-            response = getExternalID(customerNumber, accountNumber, bearerToken)
+            response = getExternalID(customerNumber, accountNumber, bearerToken) 
 
 
             response_data = {'externalAccount': response['awsAccountId'], 'ExternalId': response['externalIdValue']}
