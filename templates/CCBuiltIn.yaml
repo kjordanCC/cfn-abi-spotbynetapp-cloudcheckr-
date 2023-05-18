@@ -1,0 +1,479 @@
+########################################################################
+# Copyright NetApp, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+########################################################################
+
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Automation of building IAM Role and credentialing against CloudCheckr
+  account
+Parameters:
+  pAPIKey:
+    Type: String
+    Description: API Key
+    NoEcho: true
+  pAPISecret:
+    Type: String
+    Description: API Secret
+    NoEcho: true
+  pCustomerNumber:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    Type: String
+    Description: Customer Number
+  pCurBucketName:
+    AllowedPattern: ^(?!$)[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$|^$
+    Type: String
+    Description: Name of the S3 bucket for CUR data
+  pBillingBucketName:
+    AllowedPattern: ^(?!$)[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$|^$
+    Type: String
+    Description: Name of the S3 bucket for billing data
+  pCloudTrailBucketName:
+    AllowedPattern: ^(?!$)[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$|^$
+    Type: String
+    Description: Name of the S3 bucket for CloudTrail logs
+  pABIStagingS3Key:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    Type: String
+    Default: cfn-abi-spotbynetapp-cloudcheckr
+  pABISourceS3BucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    Type: String
+    Default: aws-abi-pilot
+  pABIS3BucketRegion:
+    AllowedPattern: ^[a-z][a-z]-[a-z]*-[0-9]*$
+    Type: String
+    Default: us-east-1
+
+Resources:
+  rABIStagingS3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W35
+            reason: S3 access logs intentionally not enabled
+      checkov:
+        skip:
+          - id: CKV_AWS_18
+            comment: S3 access logs intentionally not enabled
+    Properties:
+      BucketName: !Sub ${pABIStagingS3Key}-${AWS::AccountId}-${AWS::Region}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+      Tags:
+        - Key: abi-solution
+          Value: !Ref pABIStagingS3Key
+      VersioningConfiguration:
+        Status: Enabled
+  rABIStagingS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: F16
+            reason: GetObject is restricted to AWS account only
+    Properties:
+      Bucket: !Ref rABIStagingS3Bucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AllowDeploymentRoleGetObject
+            Effect: Allow
+            Action: s3:GetObject
+            Principal: '*'
+            Resource: !Sub arn:${AWS::Partition}:s3:::${rABIStagingS3Bucket}/*
+          - Sid: DenyExternalPrincipals
+            Effect: Deny
+            Action: 's3:*'
+            Principal: '*'
+            Resource:
+              - !Sub arn:${AWS::Partition}:s3:::${rABIStagingS3Bucket}
+              - !Sub arn:${AWS::Partition}:s3:::${rABIStagingS3Bucket}/*
+            Condition:
+              StringNotEquals:
+                aws:PrincipalAccount: !Sub ${AWS::AccountId}
+          - Sid: SecureTransport
+            Effect: Deny
+            Action: 's3:*'
+            Principal: '*'
+            Resource:
+              - !Sub arn:${AWS::Partition}:s3:::${rABIStagingS3Bucket}
+              - !Sub arn:${AWS::Partition}:s3:::${rABIStagingS3Bucket}/*
+            Condition:
+              Bool:
+                aws:SecureTransport: False
+  rLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: Allow * in resource when required
+          - id: W28
+            reason: The role name is defined to identify automation resources
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaExecutionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: logs:CreateLogGroup
+                Resource: arn:aws:logs:*:*:*
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:log-group:/aws/lambda/*
+              - Effect: Allow
+                Action: iam:ListAccountAliases
+                Resource: '*'
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource:
+                  - Fn::Sub: arn:${AWS::Partition}:s3:::${pCurBucketName}
+                  - Fn::Sub: arn:${AWS::Partition}:s3:::${pCurBucketName}/*
+                  - Fn::Sub: arn:${AWS::Partition}:s3:::${pBillingBucketName}
+                  - Fn::Sub: arn:${AWS::Partition}:s3:::${pBillingBucketName}/*
+                  - Fn::Sub: arn:${AWS::Partition}:s3:::${pCloudTrailBucketName}
+                  - Fn::Sub: arn:${AWS::Partition}:s3:::${pCloudTrailBucketName}/*
+              - Effect: Allow
+                Action: logs:*
+                Resource: arn:aws:logs:*:*:*
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource:
+                  - arn:aws:lambda:*:*:function:rLambdaawsCreateAccountFunction
+                  - arn:aws:lambda:*:*:function:rgetExternalIDFunction
+                  - arn:aws:lambda:*:*:function:rLambdaAwsCredentialAccountFunction
+
+
+
+  rLambdaawsCreateAccountFunction:
+    DependsOn: rCopyZips
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+        - id: W58
+          reason: Lambda role provides acess to Cloudwatch Logs
+        - id: W89
+          reason: Lambda does not need to communicate with VPC resources
+        - id: W92
+          reason: Lambda does not need reserved concurrent executions
+      checkov:
+        skip:
+        - id: CKV_AWS_115
+          comment: Lambda does not need reserved concurrent executions.
+        - id: CKV_AWS_116
+          comment: DLQ not needed, as Lambda function only triggered by CloudFormation
+            events.
+        - id: CKV_AWS_117
+          comment: Lambda does not need to communicate with the VPC resources.
+        - id: CKV_AWS_173
+          comment: Environment variables are not sensitive.
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: awsCreateAccount.lambda_handler
+      Role:
+        Fn::GetAtt:
+        - rLambdaExecutionRole
+        - Arn
+      Code:
+        S3Bucket: !Ref pABISourceS3BucketName
+        S3Key: !Sub ${pABIStagingS3Key}/lambda_functions/packages/awsCreateAccount/lambda.zip
+      Runtime: python3.9
+      Timeout: 300
+      MemorySize: 128
+  rCustomResourceAwsCreateAccountInvoke:
+    Type: Custom::LambdaInvoke
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+        - rLambdaawsCreateAccountFunction
+        - Arn
+      pAPIKey:
+        Ref: pAPIKey
+      pAPISecret:
+        Ref: pAPISecret
+      pCustomerNumber:
+        Ref: pCustomerNumber
+  rgetExternalIDFunction:
+    DependsOn: rCopyZips
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+        - id: W58
+          reason: Lambda role provides acess to Cloudwatch Logs
+        - id: W89
+          reason: Lambda does not need to communicate with VPC resources
+        - id: W92
+          reason: Lambda does not need reserved concurrent executions
+      checkov:
+        skip:
+        - id: CKV_AWS_115
+          comment: Lambda does not need reserved concurrent executions.
+        - id: CKV_AWS_116
+          comment: DLQ not needed, as Lambda function only triggered by CloudFormation
+            events.
+        - id: CKV_AWS_117
+          comment: Lambda does not need to communicate with the VPC resources.
+        - id: CKV_AWS_173
+          comment: Environment variables are not sensitive.
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: getExternalID.lambda_handler
+      Role:
+        Fn::GetAtt:
+        - rLambdaExecutionRole
+        - Arn
+      Code:
+        S3Bucket: !Ref pABISourceS3BucketName
+        S3Key: !Sub ${pABIStagingS3Key}/lambda_functions/packages/getExternalID/lambda.zip
+      Runtime: python3.9
+      Timeout: 300
+      MemorySize: 128
+  rCustomResourceGetExternalIDInvoke:
+    Type: Custom::LambdaInvoke
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+        - rgetExternalIDFunction
+        - Arn
+      pAPIKey:
+        Ref: pAPIKey
+      pAPISecret:
+        Ref: pAPISecret
+      pCustomerNumber:
+        Ref: pCustomerNumber
+      AccountNumber:
+        Fn::GetAtt:
+        - rCustomResourceAwsCreateAccountInvoke
+        - accountNumber
+  rdeployIAMstack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL:  !Sub https://${rABIStagingS3Bucket}.s3.${pABIS3BucketRegion}.${AWS::URLSuffix}/${pABIStagingS3Key}/templates/cciamrole/cc_aws_cfn_iam_stack.template.json
+      Parameters:
+        ExternalId:
+          Fn::GetAtt:
+          - rCustomResourceGetExternalIDInvoke
+          - ExternalId
+        CurBucket:
+          Ref: pCurBucketName
+        BillingBucket:
+          Ref: pBillingBucketName
+        CloudTrailBucket:
+          Ref: pCloudTrailBucketName
+  rLambdaAwsCredentialAccountFunction:
+    DependsOn: rCopyZips
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+        - id: W58
+          reason: Lambda role provides acess to Cloudwatch Logs
+        - id: W89
+          reason: Lambda does not need to communicate with VPC resources
+        - id: W92
+          reason: Lambda does not need reserved concurrent executions
+      checkov:
+        skip:
+        - id: CKV_AWS_115
+          comment: Lambda does not need reserved concurrent executions.
+        - id: CKV_AWS_116
+          comment: DLQ not needed, as Lambda function only triggered by CloudFormation
+            events.
+        - id: CKV_AWS_117
+          comment: Lambda does not need to communicate with the VPC resources.
+        - id: CKV_AWS_173
+          comment: Environment variables are not sensitive.
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: awsCredentialAccount.lambda_handler
+      Role:
+        Fn::GetAtt:
+        - rLambdaExecutionRole
+        - Arn
+      Code:
+        S3Bucket: !Ref pABISourceS3BucketName
+        S3Key: !Sub ${pABIStagingS3Key}/lambda_functions/packages/awsCredentialAccount/lambda.zip
+      Runtime: python3.9
+      Timeout: 300
+      MemorySize: 128
+  rCustomResourceAwsCredentialAccountInvoke:
+    Type: Custom::LambdaInvoke
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+        - rLambdaAwsCredentialAccountFunction
+        - Arn
+      pAPIKey:
+        Ref: pAPIKey
+      pAPISecret:
+        Ref: pAPISecret
+      pCustomerNumber:
+        Ref: pCustomerNumber
+      AccountNumber:
+        Fn::GetAtt:
+        - rCustomResourceAwsCreateAccountInvoke
+        - accountNumber
+      RoleArn:
+        Fn::GetAtt:
+        - rdeployIAMstack
+        - Outputs.RoleArn
+
+
+
+  rCopyZips:
+    Type: Custom::CopyZips
+    Properties:
+      ServiceToken: !GetAtt 'rCopyZipsFunction.Arn'
+      SourceBucket: !Ref 'pABISourceS3BucketName'
+      DestBucket: !Ref 'rABIStagingS3Bucket'
+      Prefix: !Sub ${pABIStagingS3Key}/
+      Objects:
+        - lambda_functions/packages/awsCreateAccount/lambda.zip
+        - lambda_functions/packages/awsCredentialAccount/lambda.zip
+        - lambda_functions/packages/getExternalID/lambda.zip
+        - templates/CCBuiltIn.yaml
+        - templates/cciamrole/cc_aws_cfn_iam_stack.template.json 
+
+  rCopyZipsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Path: /
+      Policies:
+        - PolicyName: lambda-copier
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectTagging
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:s3:::${pABISourceS3BucketName}/'
+                  - !Sub 'arn:${AWS::Partition}:s3:::${pABISourceS3BucketName}/${pABIStagingS3Key}/*'
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:PutObjectTagging
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:s3:::${rABIStagingS3Bucket}/'
+                  - !Sub 'arn:${AWS::Partition}:s3:::${rABIStagingS3Bucket}/${pABIStagingS3Key}/*'
+              - Effect: Allow
+                Action:
+                  - s3:ListAllMyBuckets
+                Resource: '*'
+
+  rCopyZipsFunction:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W58
+            reason: Lambda role provides access to CloudWatch Logs
+          - id: W89
+            reason: Lambda does not need to communicate with VPC resources.
+          - id: W92
+            reason: Lambda does not need reserved concurrent executions.
+      checkov:
+        skip:
+          - id: CKV_AWS_115
+            comment: Lambda does not need reserved concurrent executions.
+          - id: CKV_AWS_116
+            comment: DLQ not needed, as Lambda function only triggered by CloudFormation events.
+          - id: CKV_AWS_117
+            comment: Lambda does not need to communicate with VPC resources.
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Copies objects from a source S3 bucket to a destination
+      Handler: index.handler
+      Runtime: python3.9
+      MemorySize: 128
+      Role: !GetAtt 'rCopyZipsRole.Arn'
+      Timeout: 240
+      Code:
+        ZipFile: |
+          import json
+          import logging
+          import threading
+          import boto3
+          import cfnresponse
+          def copy_objects(source_bucket, dest_bucket, prefix, objects):
+              s3 = boto3.client('s3')
+              for o in objects:
+                  key = prefix + o
+                  copy_source = {
+                      'Bucket': source_bucket,
+                      'Key': key
+                  }
+                  print(('copy_source: %s' % copy_source))
+                  print(('dest_bucket = %s'%dest_bucket))
+                  print(('key = %s' %key))
+                  s3.copy_object(CopySource=copy_source, Bucket=dest_bucket,
+                      Key=key)
+          def bucket_exists():
+              s3 = boto3.client('s3')
+              buckets = s3.list_buckets()
+              for bucket in buckets['Buckets']:
+                  return True
+          def delete_objects(bucket, prefix, objects):
+              s3 = boto3.client('s3')
+              if bucket_exists():
+                  objects = {'Objects': [{'Key': prefix + o} for o in objects]}
+                  s3.delete_objects(Bucket=bucket, Delete=objects)
+          def timeout(event, context):
+              logging.error('Execution is about to time out, sending failure response to CloudFormation')
+              cfnresponse.send(event, context, cfnresponse.FAILED, {}, None)
+          def handler(event, context):
+              # make sure we send a failure to CloudFormation if the function
+              # is going to timeout
+              timer = threading.Timer((context.get_remaining_time_in_millis()
+                      / 1000.00) - 0.5, timeout, args=[event, context])
+              timer.start()
+              print(('Received event: %s' % json.dumps(event)))
+              status = cfnresponse.SUCCESS
+              try:
+                  source_bucket = event['ResourceProperties']['SourceBucket']
+                  dest_bucket = event['ResourceProperties']['DestBucket']
+                  prefix = event['ResourceProperties']['Prefix']
+                  objects = event['ResourceProperties']['Objects']
+                  if event['RequestType'] == 'Delete':
+                      delete_objects(dest_bucket, prefix, objects)
+                  else:
+                      copy_objects(source_bucket, dest_bucket, prefix, objects)
+              except Exception as e:
+                  logging.error('Exception: %s' % e, exc_info=True)
+                  status = cfnresponse.FAILED
+              finally:
+                  timer.cancel()
+                  cfnresponse.send(event, context, status, {}, None)

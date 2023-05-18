@@ -1,33 +1,27 @@
 project:
-  name: update-me-to-project-repo-name
-  owner: quickstart@amazon.com
-  package_lambda: false
+  name: cfn-abi-spotbynetapp-cloudcheckr
+  owner: kjordan@netapp.com
+  package_lambda: true
+  shorten_stack_name: true
+  s3_regional_buckets: false
   regions:
-  - ap-northeast-1
-  - ap-northeast-2
-  - ap-southeast-1
-  - ap-southeast-2
-  - eu-central-1
-  - eu-west-1
-  - sa-east-1
+ 
   - us-east-1
-  - us-west-1
-  - us-west-2
+
 tests:
   sample:
     parameters:
-      Param1: 'Inputs to Stack'
-      # Examples: of other taskcat dynamic input parameters for more into see http://taskcat.io
-      #
-      #      AvailabilityZones: $[taskcat_genaz_3]
-      #      ByteValue: 1
-      #      PasswordA: $[taskcat_genpass_8A]
-      #      PasswordB: $[taskcat_genpass_32S]
-      #      RandomNumber: $[taskcat_random-numbers]
-      #      RandomString: $[taskcat_random-string]
-      #      StackName: TestStack
-      #      UUID: $[taskcat_genuuid]
-      #
+      pAPIKey: $[taskcat_ssm_/cloudcheckr/api_key]
+      pAPISecret: $[taskcat_ssm_/cloudcheckr/api_secret]
+      pABISourceS3BucketName: $[taskcat_autobucket]
+      pABIStagingS3Key: $[taskcat_project_name]
+      pBillingBucketName: $[taskcat_ssm_/cloudcheckr/billing_bucket_name]
+      pCloudTrailBucketName: $[taskcat_ssm_/cloudcheckr/cloudtrail_bucket_name]
+      pCurBucketName: $[taskcat_ssm_/cloudcheckr/cur_bucket_name]
+      pCustomerNumber: $[taskcat_ssm_/cloudcheckr/customer_number]
+
+
+      
     regions:
     - us-east-1
-    template: templates/sample-workload.template.yaml
+    template: templates/CCBuiltIn.yaml

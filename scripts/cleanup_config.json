@@ -5,7 +5,8 @@
     },
     {
         "Type" : "S3_BUCKET",
-        "Filter": "replace-with-s3-bucket-prefix-to-be-cleaned"
+        "Filter": "cfn-abi-spotbynetapp-cloudcheckr-"
+
     },
     {
         "Type" : "S3_BUCKET",
@@ -20,4 +21,6 @@
         "Type" : "LOG_GROUP",
         "Filter" : "path/to/log-group-prefix-to-delete"
     }
+
 ]
+
