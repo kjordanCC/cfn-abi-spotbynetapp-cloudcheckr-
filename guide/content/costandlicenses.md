@@ -10,23 +10,23 @@ Understanding the cost implications and the licensing requirements is crucial be
 
 ### Partner Cost
 
-Describe the cost associated with the partner solution, if any. Provide details on the pricing model, such as subscription-based or pay-as-you-go, and any other relevant information.
+The cost associated with the CloudCheckr solution can be found on their AWS Marketplace listing. The pricing model is subscription-based.
 
 ### AWS Service Cost
 
-List and describe the costs associated with the AWS services that will be used. Direct users to the AWS Pricing page for detailed and up-to-date information: [AWS Pricing](https://aws.amazon.com/pricing/).
+The ABI for CloudCheckr uses several AWS services, including IAM, CloudFormation, S3, and Lambda. The costs for these services are based on usage. For detailed and up-to-date information, please refer to the AWS Pricing page.
 
 ### Any Other Costs
 
-Detail any other costs that might be associated with this solution, such as third-party tools or additional software that needs to be purchased.
+There are no other costs associated with this solution. All necessary components are included in the CloudCheckr subscription and the AWS service usage fees.
 
 ### Partner License
 
-[CloudCheckr Pricing](https://aws.amazon.com/marketplace/pp/prodview-s3pimhbls2qpm)
+The licensing for the CloudCheckr solution is included in the subscription cost. For more details, please refer to CloudCheckr Pricing.
 
 ### ABI License
 
-Discuss the licensing for the ABI, if applicable. Explain any terms and conditions that users should be aware of.
+The ABI itself does not require a separate license. It is provided as part of the AWS solution to help automate the configuration and credentialing process.
 
 **Note:** It’s important to conduct a thorough cost analysis and understand the licensing requirements to avoid any unexpected expenses and ensure compliance with all licensing terms.
 
