@@ -23,9 +23,9 @@ This option builds a robust, scalable, and secure environment for managing and m
 
 Following are the additional deployment options supported by this ABI package, offering flexibility and control in deploying the solution across various environments.
 
-### Option 1: Launch the CloudFormation Template in the Management Account
+### Option 1: Launch the CloudFormation Template in individual AWS Account
 
-Choose this option to deploy the solution using a CloudFormation template in the management account. This method provides an automated, consistent, and repeatable deployment process, ensuring that the environment is configured optimally.
+Choose this option to deploy the solution using a CloudFormation template in each individual account.
 
 - **Details and Instructions:**
   - Navigate to the [CloudFormation Console](https://console.aws.amazon.com/cloudformation/).

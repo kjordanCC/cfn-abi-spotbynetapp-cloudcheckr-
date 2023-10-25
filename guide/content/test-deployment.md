@@ -6,7 +6,7 @@ description: Test the deployment
 
 ## Step-1
 
-Verify the AWS services: Log in to your AWS Management Console and navigate to the services that were configured by the ABI. Check if the resources were created and configured as expected.
+Verify the AWS services: Log in to your AWS Console and navigate to the services that were configured by the ABI. Check if the resources were created and configured as expected.
 
 ## Step-2
 
