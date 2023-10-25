@@ -24,10 +24,10 @@ Before deploying this ABI package, complete the following steps:
         - Save the new client.
         - Click +new to generate an access key, provide a name, and select Create.
         - Copy the API secret
-    - Have an AWS Cost and Usage Report S3 bucket on your AWS Account. If you don't have one you can create one by following these (steps) [https://docs.aws.amazon.com/cur/latest/userguide/cur-s3.html].
+    - Have an AWS Cost and Usage Report S3 bucket on your AWS Account. If you don't have one you can create one by following these (steps)[https://docs.aws.amazon.com/cur/latest/userguide/cur-s3.html].
 
 3. **Become Familiar with Additional Resources**:
-    - Ensure to review and become familiar with the [additional resources](https://success.cloudcheckr.com), which will be helpful later in this guide.
+    - Ensure to review and become familiar with the [CloudCheckr additional resources documentation](https://success.cloudcheckr.com), which will be helpful later in this guide.
 
 
 **Next:** Choose **[Deployment Steps](/deployment-steps/index.html)** to get started.
