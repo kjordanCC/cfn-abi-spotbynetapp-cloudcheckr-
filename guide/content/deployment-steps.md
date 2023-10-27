@@ -14,7 +14,6 @@ description: Deployment steps
         * **pAPISecret**: The secret associated with the APIKey.
         * **pCustomerNumber**: Found in the URL when logged into CloudCheckr. Example: https://app-us.cloudcheckr.com/customers/1234567 (The number after /customers/  in this case the customer number would be 1234567).
         * **pCurBucketName**: Name of the S3 bucket for CUR data (If master payer account).
-        * **pBillingBucketName**: Name of the S3 bucket for billing data.(deprecated)
         * **pCloudTrailBucketName**: Name of the S3 bucket for CloudTrail logs.
         * **pABIStagingS3Key**: The staging S3 key for ABI.
         * **pABISourceS3BucketName**: The source S3 bucket name for ABI.
