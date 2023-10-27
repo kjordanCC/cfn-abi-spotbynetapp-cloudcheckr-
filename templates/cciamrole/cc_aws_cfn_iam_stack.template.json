@@ -36,7 +36,7 @@
 
 					"Label": { "default": "Billing" },
 
-					"Parameters": [ "CostPermissions", "BillingBucket", "CurBucket" ]
+					"Parameters": [ "CostPermissions", "CurBucket" ]
 
 				},
 
@@ -130,14 +130,6 @@
 
 		},
 
-		"BillingBucket":{
-
-			"Type":"String",
-
-			"Description":"AWS Detailed Billing Report Bucket"
-
-		},
-
 		"CurBucket":{
 
 			"Type":"String",
@@ -181,8 +173,6 @@
 		"IncludeCloudTrailBucket": {"Fn::Not": [{"Fn::Equals": ["", {"Ref": "CloudTrailBucket"}]}]},
 
 		"IsAccountTypeStandard": {"Fn::Equals": [{"Ref": "AccountType"}, "Standard"]},
-
-		"IncludeBillingBucket": { "Fn::And": [ {"Condition": "IsAccountTypeStandard"}, {"Fn::Not": [{"Fn::Equals": ["", {"Ref": "BillingBucket"}]}]}]},
 
 		"IncludeCurBucket": { "Fn::And": [ {"Condition": "IsAccountTypeStandard"}, {"Fn::Not": [{"Fn::Equals": ["", {"Ref": "CurBucket"}]}]}]}
 
@@ -775,66 +765,6 @@
 						],
 
 						"Resource":"*"
-
-					}]
-
-				}
-
-			}
-
-		},
-
-		"DbrPolicy":{
-
-			"Type":"AWS::IAM::Policy",
-
-			"Condition":"IncludeBillingBucket",
-
-			"Properties":{
-
-				"Roles":[{"Ref":"IamRole"}],
-
-				"PolicyName":"CloudCheckr-DBR-Policy",
-
-				"PolicyDocument":{
-
-					"Version":"2012-10-17",
-
-					"Statement":[{
-
-						"Sid":"CostReadDBR",
-
-						"Effect":"Allow",
-
-						"Action":[
-
-							"s3:GetBucketACL",
-
-							"s3:GetBucketLocation",
-
-							"s3:GetBucketLogging",
-
-							"s3:GetBucketPolicy",
-
-							"s3:GetBucketTagging",
-
-							"s3:GetBucketWebsite",
-
-							"s3:GetBucketNotification",
-
-							"s3:GetLifecycleConfiguration",
-
-							"s3:GetObject"
-
-						],
-
-						"Resource":[
-
-							{ "Fn::Sub":"arn:${AWS::Partition}:s3:::${BillingBucket}" },
-
-							{ "Fn::Sub":"arn:${AWS::Partition}:s3:::${BillingBucket}/*" }
-
-						]
 
 					}]
 

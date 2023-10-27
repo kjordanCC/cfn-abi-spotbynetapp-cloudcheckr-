@@ -18,7 +18,4 @@ description: Additional Resources
 
 ## Other documentation
 
-* [AWS Security Reference Architecture (AWS SRA)](https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/welcome.html)
-* [Code repository for AWS SRA examples](https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/code-repo.html)
-
 **Next:** Choose [Troubleshooting](/troubleshooting/index.html).

@@ -8,25 +8,19 @@ description: Information regarding the cost of the solution and licenses require
 
 Understanding the cost implications and the licensing requirements is crucial before deploying the ABI package for CloudCheckr. Below are the categories you should consider:
 
-### Partner Cost
+### CloudCheckr Cost and licenses
 
-Describe the cost associated with the partner solution, if any. Provide details on the pricing model, such as subscription-based or pay-as-you-go, and any other relevant information.
+The cost associated with the CloudCheckr solution can be found on their (AWS Marketplace listing)[https://aws.amazon.com/marketplace/pp/prodview-s3pimhbls2qpm?ref_=awsmp_pp_cldchkr&trk=awsmp_pp_cldchkr]. The pricing model is subscription-based.
 
 ### AWS Service Cost
 
-List and describe the costs associated with the AWS services that will be used. Direct users to the AWS Pricing page for detailed and up-to-date information: [AWS Pricing](https://aws.amazon.com/pricing/).
+The ABI for CloudCheckr uses several AWS services, including IAM, CloudFormation, (Amazon S3)[https://aws.amazon.com/s3/pricing/], and (AWS Lambda)[https://aws.amazon.com/lambda/pricing/]. The costs for these services are based on usage. For detailed and up-to-date information, please refer to the AWS Pricing page for each service.
 
-### Any Other Costs
+### ABI cost and licenses
 
-Detail any other costs that might be associated with this solution, such as third-party tools or additional software that needs to be purchased.
+Using ABI doesn’t incur additional charges. The ABI itself does not require a separate license. It is provided as part of the AWS solution to help automate the configuration and credentialing process.
 
-### Partner License
-
-[CloudCheckr Pricing](https://aws.amazon.com/marketplace/pp/prodview-s3pimhbls2qpm)
-
-### ABI License
-
-Discuss the licensing for the ABI, if applicable. Explain any terms and conditions that users should be aware of.
+(ABI License)[https://github.com/aws-ia/cfn-abi-crowdstrike-fcs/blob/main/LICENSE]
 
 **Note:** It’s important to conduct a thorough cost analysis and understand the licensing requirements to avoid any unexpected expenses and ensure compliance with all licensing terms.
 

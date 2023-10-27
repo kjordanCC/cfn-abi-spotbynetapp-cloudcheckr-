@@ -24,10 +24,6 @@ Parameters:
     AllowedPattern: ^(?!$)[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$|^$
     Type: String
     Description: Name of the S3 bucket for CUR data
-  pBillingBucketName:
-    AllowedPattern: ^(?!$)[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$|^$
-    Type: String
-    Description: Name of the S3 bucket for billing data
   pCloudTrailBucketName:
     AllowedPattern: ^(?!$)[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$|^$
     Type: String
@@ -153,8 +149,6 @@ Resources:
                 Resource:
                   - Fn::Sub: arn:${AWS::Partition}:s3:::${pCurBucketName}
                   - Fn::Sub: arn:${AWS::Partition}:s3:::${pCurBucketName}/*
-                  - Fn::Sub: arn:${AWS::Partition}:s3:::${pBillingBucketName}
-                  - Fn::Sub: arn:${AWS::Partition}:s3:::${pBillingBucketName}/*
                   - Fn::Sub: arn:${AWS::Partition}:s3:::${pCloudTrailBucketName}
                   - Fn::Sub: arn:${AWS::Partition}:s3:::${pCloudTrailBucketName}/*
               - Effect: Allow
@@ -280,8 +274,6 @@ Resources:
           - ExternalId
         CurBucket:
           Ref: pCurBucketName
-        BillingBucket:
-          Ref: pBillingBucketName
         CloudTrailBucket:
           Ref: pCloudTrailBucketName
   rLambdaAwsCredentialAccountFunction:
