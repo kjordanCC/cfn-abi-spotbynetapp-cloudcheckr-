@@ -15,7 +15,6 @@ tests:
       pAPISecret: $[taskcat_ssm_/cloudcheckr/api_secret]
       pABISourceS3BucketName: $[taskcat_autobucket]
       pABIStagingS3Key: $[taskcat_project_name]
-      pBillingBucketName: $[taskcat_ssm_/cloudcheckr/billing_bucket_name]
       pCloudTrailBucketName: $[taskcat_ssm_/cloudcheckr/cloudtrail_bucket_name]
       pCurBucketName: $[taskcat_ssm_/cloudcheckr/cur_bucket_name]
       pCustomerNumber: $[taskcat_ssm_/cloudcheckr/customer_number]
