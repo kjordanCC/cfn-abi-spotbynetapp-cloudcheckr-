@@ -1,46 +1,33 @@
 ---
 weight: 6
-title: Deployment Options
+title: Deployment options
 description: Various deployment options for the ABI package.
 ---
+# Deployment options
 
-# Deployment Options
+This AWS Built-in solution provides various deployment options to cater to different organizational needs and requirements. Choose the one that fits your environment and infrastructure setup.
 
-This ABI package provides various deployment options to cater to different organizational needs and requirements. Choose the one that fits your environment and infrastructure setup.
-
-## Deployment Option 1:
-
-### [Deploy CloudCheckr for AWS Organizations](quick-link)
-
-This option builds a robust, scalable, and secure environment for managing and monitoring your AWS resources and infrastructure.
-
-#### Features:
+Features include
 - Automated configuration and setup.
 - Seamless integration with existing AWS services.
 - Comprehensive monitoring and management capabilities.
 
-## Deployment options supported by this ABI package
+The following deployment options offer flexibility and control in deploying the solution across various environments.
 
-Following are the additional deployment options supported by this ABI package, offering flexibility and control in deploying the solution across various environments.
-
-### Option 1: Launch the CloudFormation Template in individual AWS Account
+## Option 1: Launch the CloudFormation template in individual AWS account
 
 Choose this option to deploy the solution using a CloudFormation template in each individual account.
 
-- **Details and Instructions:**
-  - Navigate to the [CloudFormation Console](https://console.aws.amazon.com/cloudformation/).
-  - Follow the instructions detailed in the [Launch Using CloudFormation](/launch-using-cloudformation/index.html) guide.
+Do the following steps:
+1. Navigate to the [CloudFormation console](https://console.aws.amazon.com/cloudformation/).
+2. Follow the instructions in the [Launch the CloudFormation template in the management account](https://github.com/aws-ia/cfn-abi-spotbynetapp-cloudcheckr/blob/main/guide/content/deployment-steps.md#launch-the-cloudformation-template-in-the-management-account) section.
 
-[Launch CloudFormation Template in the Management Account](/launch-using-cloudformation/index.html)
+## Option 2: Launch using Customizations for Control Tower
 
-### Option 2: Launch using Customizations for Control Tower (CfCT)
+This method is for organizations using AWS Control Tower. It uses Customizations for AWS Control Tower (CfCT) to facilitate deployment, ensuring alignment with organizational policies and standards.
 
-For organizations using AWS Control Tower, opt for this method. It leverages the Customizations for Control Tower to facilitate the deployment, ensuring alignment with organizational policies and standards.
+Do the following steps:
+1. Navigate to the [CfCT console](https://console.aws.amazon.com/controltower/).
+2. Follow the instructions in the [Launch Using Customizations for Control Tower](https://github.com/aws-ia/cfn-abi-spotbynetapp-cloudcheckr/blob/main/guide/content/deployment-steps.md#launch-using-customizations-for-control-tower-cfct) section.
 
-- **Details and Instructions:**
-  - Access the [CfCT Console](https://console.aws.amazon.com/controltower/).
-  - Follow the instructions outlined in the [Launch Using CfCT](/launch-using-cfct/index.html) guide.
-
-[Launch Using Customizations for Control Tower](/launch-using-cfct/index.html)
-
-**Next:** Choose [Pre Deployment Steps](/pre-deployment-steps/index.html) to get started.
+**Next**: [Predeployment steps](/pre-deployment-steps/index.html)

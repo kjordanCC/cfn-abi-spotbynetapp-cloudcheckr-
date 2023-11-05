@@ -1,21 +1,13 @@
 ---
 weight: 11
-title: Additional Resources
-description: Additional Resources
+title: Additional resources
+description: Additional resources
 ---
+# Additional resources
 
-## Partner documentation
+* [CloudCheckr Success Center](https://success.cloudcheckr.com/)
+* [Configure CloudCheckr CMx API](https://success.cloudcheckr.com/article/93urirlmng-cloudcheckr-cmx-api)
+* [CloudCheckr - Govern and Optimize AWS at Scale (AWS Marketeplace listing)](https://aws.amazon.com/marketplace/pp/prodview-s3pimhbls2qpm)
+* [IAM roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html)
 
-* [CloudCheckr Documentation](https://success.cloudcheckr.com/)
-* [CloudCheckr API Management](https://success.cloudcheckr.com/article/93urirlmng-cloudcheckr-cmx-api)
-
-## AWS Services
-
-* [AWS Marketplace - CloudCheckr](https://aws.amazon.com/marketplace/pp/prodview-s3pimhbls2qpm)
-* [AWS IAM Roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html)
-
-## Frequently asked questions (FAQs)
-
-## Other documentation
-
-**Next:** Choose [Troubleshooting](/troubleshooting/index.html).
+**Next**: [Troubleshooting](/troubleshooting/index.html)

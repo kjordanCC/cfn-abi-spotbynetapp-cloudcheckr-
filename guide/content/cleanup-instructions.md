@@ -1,55 +1,42 @@
 ---
 weight: 99
-title: Cleanup Instructions
+title: Cleanup instructions
 description: Instructions to clean up the resources created by the ABI package
 ---
 
-## Cleanup Instructions
+# Cleanup instructions
 
-To ensure that all resources created by the ABI package are removed and you do not incur any unexpected costs, follow the instructions below. The cleanup process involves deleting the CloudFormation stack and all associated resources.
+To remove all resources created by the AWS Built-in solution and avoid unexpected costs, follow these instructions. The cleanup process involves deleting the CloudFormation stack and all associated resources.
 
-![Under Construction](/images/under_construction.jpeg)
+## Deleting the CloudFormation stack
 
-### Deleting the CloudFormation Stack:
+1. Open the [AWS CloudFormation console](https://console.aws.amazon.com/cloudformation/).
+2. Locate the stack created by the AWS Built-in solution.
+3. Choose **Delete**, and confirm the deletion.
 
-1. **Navigate to the AWS CloudFormation Console:**
-   Open the [AWS CloudFormation Console](https://console.aws.amazon.com/cloudformation/).
-2. **Find the Stack:**
-   Locate the stack created by the ABI package in the list of stacks.
-3. **Delete the Stack:**
-   Select the stack and choose “Delete”. Confirm the deletion to proceed. AWS CloudFormation will automatically delete all related resources.
+CloudFormation automatically deletes all related resources.
 
-### Deleting Additional Resources:
+## Deleting additional resources
 
-If any additional resources were created outside of the CloudFormation stack, be sure to delete them manually. These may include:
+If you created additional resources outside of the CloudFormation stack, manually delete those resources. Additional resources typically include S3 buckets, IAM roles, and Lambda functions.
 
-- S3 Buckets
-- IAM Roles
-- Lambda Functions
+### Deleting S3 buckets
 
-#### For S3 Buckets:
+1. Navigate to the [AWS S3 console](https://s3.console.aws.amazon.com/s3/).
+2. Locate the buckets created by the AWS Built-in solution and delete them.
 
-1. **Navigate to the S3 Console:**
-   Open the [AWS S3 Console](https://s3.console.aws.amazon.com/s3/).
-2. **Locate and Delete the Buckets:**
-   Find the buckets created by the ABI and delete them.
+### Deleting IAM roles
 
-#### For IAM Roles:
+1. Navigate to [AWS IAM console](https://console.aws.amazon.com/iam/).
+2. Locate the roles created by the AWS Built-in solution and delete them.
 
-1. **Navigate to the IAM Console:**
-   Open the [AWS IAM Console](https://console.aws.amazon.com/iam/).
-2. **Locate and Delete the Roles:**
-   Find the roles created by the ABI and delete them.
+### Deleting Lambda functions
 
-#### For Lambda Functions:
+1. Navigate to the [AWS Lambda console](https://console.aws.amazon.com/lambda/).
+2. Locate the Lambda functions created by the AWS Built-in solution and delete them.
 
-1. **Navigate to the Lambda Console:**
-   Open the [AWS Lambda Console](https://console.aws.amazon.com/lambda/).
-2. **Locate and Delete the Functions:**
-   Find the Lambda functions created by the ABI and delete them.
+## Verifying resource deletions
 
-### Verification:
+In each service console, verify that all AWS Built-in resources are removed. If any resources remain, they may continue to incur costs.
 
-After deleting the resources, ensure that no additional resources are left undeleted. Verify in each service console that all related resources have been removed. If any resources are left, they may continue to incur costs.
-
-**Note:** Be cautious and ensure that you are only deleting resources related to the ABI, to avoid accidentally deleting important resources.
+**Note:** Avoid accidentally deleting important resources. Be sure that you delete only resources related to the AWS Built-in solution.
