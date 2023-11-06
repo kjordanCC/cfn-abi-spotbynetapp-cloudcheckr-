@@ -1,3 +1,3 @@
-# CloudCheckr - AWS Built-In
+# CloudCheckr - AWS Built-in
 
-[**CloudCheckr ABI Documentation**]()
+[CloudCheckr AWS Built-in documentation](https://a.co/9Um96Ob)
