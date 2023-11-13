@@ -3,39 +3,40 @@ weight: 10
 title: Deployment steps
 description: Deployment steps
 ---
+# Deployment steps
 
-## Launch the CloudFormation Template in the Management Account
+## Option 1: Launch the CloudFormation template in the management account
 
-1. Download the CloudFormation template from the source: `https://github.com/aws-ia/cfn-abi-spotbynetapp-cloudcheckr/blob/main/templates/CCBuiltIn.yaml`
-2. Launch the CloudFormation template in your AWS Control Tower home region.
+1. Download the CloudFormation template: `https://github.com/aws-ia/cfn-abi-spotbynetapp-cloudcheckr/blob/main/templates/CCBuiltIn.yaml`
+2. Launch the CloudFormation template in your AWS Control Tower home Region.
     * Stack name: `template-cfn-abi-spotbynetapp-cloudcheckr-enable-integrations`
-    * List Parameters:
+    * List parameters:
         * **pAPIKey**: The API ID created in the CloudCheckr environment.
         * **pAPISecret**: The secret associated with the APIKey.
-        * **pCustomerNumber**: Found in the URL when logged into CloudCheckr. Example: https://app-us.cloudcheckr.com/customers/1234567 (The number after /customers/  in this case the customer number would be 1234567).
-        * **pCurBucketName**: Name of the S3 bucket for CUR data (If master payer account).
+        * **pCustomerNumber**: Found in the URL when logged into CloudCheckr, for example https://app-us.cloudcheckr.com/customers/1234567. In this example, the customer number is 1234567.
+        * **pCurBucketName**: Name of the S3 bucket for CUR data (if master payer account).
         * **pCloudTrailBucketName**: Name of the S3 bucket for CloudTrail logs.
-        * **pABIStagingS3Key**: The staging S3 key for ABI.
-        * **pABISourceS3BucketName**: The source S3 bucket name for ABI.
-        * **pABIS3BucketRegion**: The region of the S3 bucket for ABI.
-   
-3. Choose both the **Capabilities** and select **Submit** to launch the stack.
+        * **pABIStagingS3Key**: The staging S3 key for AWS Built-in.
+        * **pABISourceS3BucketName**: The source S3 bucket name for AWS Built-in.
+        * **pABIS3BucketRegion**: The Region of the S3 bucket for AWS Built-in.
+
+3. Choose both **Capabilities** and then **Submit** to launch the stack.
    - [] I acknowledge that AWS CloudFormation might create IAM resources with custom names.
-   - [] I acknowledge that AWS CloudFormation might require the following capability: CAPABILITY_AUTO_EXPAND   
+   - [] I acknowledge that AWS CloudFormation might require the following capability: CAPABILITY_AUTO_EXPAND.
 
 Wait for the CloudFormation status to change to `CREATE_COMPLETE` state.
 
-## Launch using Customizations for Control Tower (CfCT)
+## Option 2: Launch using Customizations for Control Tower (CfCT)
 
-The templates provided as part of the ABI packages are deployable using Customizations for Control Tower. Please check below for additional details.
+You can use CfCT to deploy the templates provided with the AWS Built-in package.
 
-#### Pre-requisites
+### Prerequisites
 
-1. The CfCT solution does not have the ability to launch resources on the Management account. Hence, you need to create the role with required permissions in the Management account.
+The CfCT solution does not launch resources on the management account. Therefore, you must create the role with required permissions in the management account.
 
-#### How it works
+### How it works
 
-To deploy this sample partner integration page using the CfCT solution, add the following blurb to the `manifest.yaml` file from your CfCT solution and update the account/ou names as needed.
+To deploy this sample partner integration page using CfCT, add the following blurb to the `manifest.yaml` file from your CfCT solution and update the account/ou names as needed.
 
 ```yaml
 resources:
@@ -44,7 +45,7 @@ resources:
     deploy_method: stack_set
     parameters:
       - parameter_key: pAPIKey #The API ID created in the CloudCheckr environment.
-        parameter_value: $[cloudcheckr/api_key] 
+        parameter_value: $[cloudcheckr/api_key]
       - parameter_key: pAPISecret #The API Secret created in the CloudCheckr environment.
         parameter_value: $[cloudcheckr/api_secret]
       - parameter_key: pABISourceS3BucketName #The source S3 bucket name for ABI.
@@ -65,4 +66,4 @@ resources:
         - OUName2
 ```
 
-**Next:** Choose [Post deployment options](/post-deployment-steps/index.html).
+**Next**: [Postdeployment options](/post-deployment-steps/index.html)
