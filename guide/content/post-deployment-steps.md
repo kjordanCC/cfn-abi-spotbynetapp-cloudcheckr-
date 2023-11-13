@@ -1,26 +1,28 @@
 ---
 weight: 9
-title: PostDeployment Options
+title: Postdeployment Options
 description: Post deployment options
 ---
+# Postdeployment steps
 
 ## Verifying the solution functionality
 
-After deploying the ABI package, you can verify its functionality by checking the following:
+After deploying the AWS Built-in solution, do the following steps to verify its functionality:
 
-1. **AWS Console**: Log in to your AWS Console and navigate to the CloudFormation service console.
-Wait for the CloudFormation stack to finish deploying. You can check the status of the deployment either via the AWS console or by running the following command:
+1. Log in to the AWS Management Console and navigate to the CloudFormation service console.
+
+Wait for the CloudFormation stack to finish deploying. You can check the status of the deployment either via the console or by running the following command:
 
    ```
    aws cloudformation describe-stacks --stack-name <YOUR_STACK_NAME>
    ```
 
-   The stack status is returned in the output. Wait until the status is `CREATE_COMPLETE` before proceeding to the next step. When the stack finishes deploying, you can access the created resources via the AWS Management Console or AWS CLI.
+   The stack status is returned in the output. Wait until the status is `CREATE_COMPLETE` before proceeding to the next step. When the stack finishes deploying, you can access the created resources via the AWS Management Console or AWS Command Line Interface (AWS CLI).
 
 After the deployment completes, you will see the root stack and nested stacks in the AWS Control Tower management account with status `CREATE_COMPLETE`.
-Check if the resources were created and configured as expected by checking the `Resources` tab in the details of the CloudFormation stack.
 
-2. **CloudCheckr Dashboard**: Log in to your CloudCheckr account and check if the AWS account has been credentialed and if the expected data is being pulled in from AWS.
+From the stack details, check the `Resources` tab to confirm that resources were created and configured as expected.
 
+2. Log in to the CloudCheckr account dashboard and confirm that the AWS account has been credentialed and is pulling in the expected data from AWS.
 
-**Next:** Choose [Test the Deployment](/test-deployment/index.html) to get started.
+**Next**: [Test the deployment](/test-deployment/index.html)
