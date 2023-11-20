@@ -5,7 +5,6 @@ project:
   shorten_stack_name: true
   s3_regional_buckets: false
   regions:
- 
   - us-east-1
 
 tests:
@@ -18,9 +17,6 @@ tests:
       pCloudTrailBucketName: $[taskcat_ssm_/cloudcheckr/cloudtrail_bucket_name]
       pCurBucketName: $[taskcat_ssm_/cloudcheckr/cur_bucket_name]
       pCustomerNumber: $[taskcat_ssm_/cloudcheckr/customer_number]
-
-
-      
     regions:
     - us-east-1
     template: templates/CCBuiltIn.yaml
