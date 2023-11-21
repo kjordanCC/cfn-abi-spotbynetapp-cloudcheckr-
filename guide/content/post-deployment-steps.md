@@ -3,7 +3,6 @@ weight: 9
 title: Postdeployment Options
 description: Post deployment options
 ---
-# Postdeployment steps
 
 ## Verifying the solution functionality
 

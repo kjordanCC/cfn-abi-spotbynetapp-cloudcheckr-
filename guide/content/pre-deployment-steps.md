@@ -4,8 +4,6 @@ title: Predeployment options
 description: Pre Deployment Options
 ---
 
-# Predeployment options
-
 Before deploying this AWS Built-in solution, complete the following steps:
 
 1. Subscribe to the CloudCheckr - Govern and Optimize AWS at Scale [AWS Marketplace listing](https://aws.amazon.com/marketplace/pp/prodview-s3pimhbls2qpm).

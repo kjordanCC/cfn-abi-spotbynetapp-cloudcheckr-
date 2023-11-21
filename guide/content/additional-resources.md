@@ -3,7 +3,6 @@ weight: 11
 title: Additional resources
 description: Additional resources
 ---
-# Additional resources
 
 * [CloudCheckr Success Center](https://success.cloudcheckr.com/)
 * [Configure CloudCheckr CMx API](https://success.cloudcheckr.com/article/93urirlmng-cloudcheckr-cmx-api)

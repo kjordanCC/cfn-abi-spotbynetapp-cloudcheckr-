@@ -3,7 +3,6 @@ weight: 6
 title: Deployment options
 description: Various deployment options for the ABI package.
 ---
-# Deployment options
 
 This AWS Built-in solution provides various deployment options to cater to different organizational needs and requirements. Choose the one that fits your environment and infrastructure setup.
 

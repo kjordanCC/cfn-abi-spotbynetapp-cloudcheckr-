@@ -3,7 +3,6 @@ weight: 10
 title: Deployment steps
 description: Deployment steps
 ---
-# Deployment steps
 
 ## Option 1: Launch the CloudFormation template in the management account
 
