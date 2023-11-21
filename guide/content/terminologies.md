@@ -11,4 +11,4 @@ description: Terminolgies used in this guide.
 * **IAM role**: An IAM entity in AWS that defines a set of permissions for making AWS service requests. IAM roles are not associated with a specific user or group. Instead, trusted entities assume roles, such as IAM users, applications, or AWS services like Amazon EC2.
 * **CloudFormation stacks**: A collection of AWS resources that you can manage as a single unit. You create, update, and delete a collection of resources by creating, updating, and deleting stacks.
 
-**Next**: [Cost and licenses](/Cost-and-licenses/index.html)
+**Next:** [Costs and licenses](/costandlicenses/index.html)

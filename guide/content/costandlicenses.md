@@ -4,8 +4,6 @@ title: Cost and licenses
 description: Information regarding the cost of the solution and licenses required.
 ---
 
-# Cost and licenses
-
 Become familiar with cost implications and licensing requirements before deploying the AWS Built-in solution for CloudCheckr.
 
 ## CloudCheckr cost and licenses

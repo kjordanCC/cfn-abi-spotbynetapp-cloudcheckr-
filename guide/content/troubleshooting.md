@@ -3,7 +3,6 @@ weight: 12
 title: Troubleshooting
 description: Troubleshooting
 ---
-# Troubleshooting
 
 For troubleshooting issues with CloudCheckr, submit a ticket on the [CloudCheckr support portal](https://spot.io/product/cloudcheckr/contact-us/).
 

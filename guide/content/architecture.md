@@ -3,7 +3,6 @@ weight: 5
 title: Architecture
 description: Solution architecture
 ---
-# Architecture
 
 Deploying this AWS Built-in solution with default parameters builds the following architecture:
 
