@@ -18,5 +18,3 @@ As shown in the diagram, the solution sets up the following:
 Using this architecture, CloudCheckr customers can monitor their environment for Amazon CloudWatch events automatically and efficiently. They can also access other valuable cloud management features within CloudCheckr.
 
 **Next**: [Deployment options](/deployment-options/index.html)
-
-

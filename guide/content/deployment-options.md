@@ -13,20 +13,7 @@ Features include
 
 The following deployment options offer flexibility and control in deploying the solution across various environments.
 
-## Option 1: Launch the CloudFormation template in individual AWS account
-
-Choose this option to deploy the solution using a CloudFormation template in each individual account.
-
-Do the following steps:
-1. Navigate to the [CloudFormation console](https://console.aws.amazon.com/cloudformation/).
-2. Follow the instructions in the [Launch the CloudFormation template in the management account](https://github.com/aws-ia/cfn-abi-spotbynetapp-cloudcheckr/blob/main/guide/content/deployment-steps.md#launch-the-cloudformation-template-in-the-management-account) section.
-
-## Option 2: Launch using Customizations for Control Tower
-
-This method is for organizations using AWS Control Tower. It uses Customizations for AWS Control Tower (CfCT) to facilitate deployment, ensuring alignment with organizational policies and standards.
-
-Do the following steps:
-1. Navigate to the [CfCT console](https://console.aws.amazon.com/controltower/).
-2. Follow the instructions in the [Launch Using Customizations for Control Tower](https://github.com/aws-ia/cfn-abi-spotbynetapp-cloudcheckr/blob/main/guide/content/deployment-steps.md#launch-using-customizations-for-control-tower-cfct) section.
+* Launch the [CloudFormation template in the AWS Management Console](/deployment-steps/index.html#launch-cfn).
+* Launch using [Customizations for AWS Control Tower (CfCT)](/deployment-steps/index.html#launch-cfct).
 
 **Next**: [Predeployment steps](/pre-deployment-steps/index.html)

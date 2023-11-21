@@ -4,7 +4,7 @@ title: Overview
 description: An overview of the CloudCheckr Integrations ABI package for AWS Organizations.
 ---
 
-This [AWS Built-in](https://aws.amazon.com/partners/built-in-partner-solutions/) solution deploys CloudCheckr integrations for AWS Organizations on the AWS Cloud. It’s designed for customers and partners looking to provide Financial Operations (FinOps) management and governance across multiple AWS accounts.
+This [AWS Built-in](https://aws.amazon.com/marketplace/solutions/built-in) solution deploys CloudCheckr integrations for AWS Organizations on the AWS Cloud. It’s designed for customers and partners looking to provide Financial Operations (FinOps) management and governance across multiple AWS accounts.
 
 Deploying this AWS Built-in solution does not guarantee an organization’s compliance with any specific laws, certifications, policies, or other regulations.
 

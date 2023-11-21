@@ -1,10 +1,10 @@
 ---
-weight: 10
+weight: 8
 title: Deployment steps
 description: Deployment steps
 ---
 
-## Option 1: Launch the CloudFormation template in the management account
+## Launch the CloudFormation template in the AWS Organizations management account {#launch-cfn}
 
 1. Download the CloudFormation template: `https://github.com/aws-ia/cfn-abi-spotbynetapp-cloudcheckr/blob/main/templates/CCBuiltIn.yaml`
 2. Launch the CloudFormation template in your AWS Control Tower home Region.
@@ -25,7 +25,7 @@ description: Deployment steps
 
 Wait for the CloudFormation status to change to `CREATE_COMPLETE` state.
 
-## Option 2: Launch using Customizations for Control Tower (CfCT)
+## Launch using Customizations for Control Tower {#launch-cfct}
 
 You can use CfCT to deploy the templates provided with the AWS Built-in package.
 
