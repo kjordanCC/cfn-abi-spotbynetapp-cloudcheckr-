@@ -90,7 +90,45 @@ def createAccount(customer_number, accountName, bearer_token):
     response_text = response.read().decode()
 
     response_json = json.loads(response_text)
-    account_id = response_json.get('id')
+
+        
+    if response_json.get('httpStatusCode') == 400:
+        preexisting_account_id = getAccountID(customer_number, accountName, bearer_token)
+        return{
+            preexisting_account_id
+        }
+    else:
+        account_id = response_json.get('id')
+        return {
+            'statusCode': 200,
+            'body': 'completed!',
+            'accountId': account_id,
+            'bearerToken': bearer_token
+        }
+
+    
+        
+    
+    
+
+def getAccountID(customer_number, accountName, bearer_token):
+    url = "https://api-us.cloudcheckr.com/customer/v1/customers/" + str(customer_number) + "/accounts?search=" + accountName
+    headers = {
+        'Accept': 'text/plain',
+        'Authorization': 'Bearer ' + bearer_token
+    }
+    response = urllib.request.urlopen(urllib.request.Request(
+        url,
+        headers=headers,
+        method='GET'),
+        timeout=15)
+    
+    response_text = response.read().decode()
+    response_json = json.loads(response_text)
+
+    
+    items = response_json.get('items', [])
+    account_id = items[0]['id'] if items else None
 
     return {
         'statusCode': 200,
