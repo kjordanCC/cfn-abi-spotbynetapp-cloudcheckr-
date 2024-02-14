@@ -2,5 +2,8 @@
     {
         "Type" : "S3_BUCKET",
         "Filter": "cfn-abi-spotbynetapp-cloudcheck"
+    },
+    {
+        "Filter" : "Lambda-S3-PresignedURL"
     }
 ]
