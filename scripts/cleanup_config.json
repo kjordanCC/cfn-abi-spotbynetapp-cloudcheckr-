@@ -4,6 +4,7 @@
         "Filter": "cfn-abi-spotbynetapp-cloudcheck"
     },
     {
+        "Type" : "STACK",
         "Filter" : "Lambda-S3-PresignedURL"
     }
 ]
