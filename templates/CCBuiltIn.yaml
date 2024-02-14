@@ -89,7 +89,8 @@ Resources:
           - Sid: AllowDeploymentRoleGetObject
             Effect: Allow
             Action: s3:GetObject
-            Principal: '*'
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
             Resource: !Sub arn:${AWS::Partition}:s3:::${rABIStagingS3Bucket}/*
           - Sid: DenyExternalPrincipals
             Effect: Deny
