@@ -5,25 +5,40 @@
 # managed and local tasks always use these variables for the project and project type path
 PROJECT_PATH=${BASE_PATH}/project
 PROJECT_TYPE_PATH=${BASE_PATH}/projecttype
-
+export REGION=$(grep -A1 regions: .taskcat.yml | awk '/ - / {print $NF}' |sort | uniq -c |sort -k1| head -1 |awk '{print $NF}')
 cd ${PROJECT_PATH}
 
-regions=(us-east-1 us-east-2 us-west-2 us-west-1)
-for region in ${regions[@]}
-do
-    echo "Cleanup running in region: $region"
-    export AWS_DEFAULT_REGION=$region
+cleanup_region() {
+    echo "Cleanup running in region: $1"
+    export AWS_DEFAULT_REGION=$1
     python3 scripts/cleanup_config.py -C scripts/cleanup_config.json
-done
+}
+    
+cleanup_all_regions() {
+    export AWS_DEFAULT_REGION=us-east-1
+    regions=($(aws ec2 describe-regions --query "Regions[*].RegionName" --output text))
+    for region in ${regions[@]}
+    do
+        cleanup_region ${region}
+    done
+}
 
-echo $AWS_DEFAULT_REGION
-unset AWS_DEFAULT_REGION
-
-echo $AWS_DEFAULT_REGION
+run_test() {
+    cleanup_all_regions
+    unset AWS_DEFAULT_REGION
+    if [ -z "$1" ]; then
+        echo "Running e2e test: ALL"
+        taskcat test run -n
+        .project_automation/functional_tests/scoutsuite/scoutsuite.sh
+    else
+        echo "Running e2e test: $1"
+        taskcat test run -n -t $1
+        .project_automation/functional_tests/scoutsuite/scoutsuite.sh
+    fi
+}
+ 
 # Run taskcat e2e test
-taskcat test run
-
-## Executing ash tool
+run_test
 
 #find ${PROJECT_PATH} -name lambda.zip -exec rm -rf {} \;
 
