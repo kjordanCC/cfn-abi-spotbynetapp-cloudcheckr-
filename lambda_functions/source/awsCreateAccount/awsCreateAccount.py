@@ -141,18 +141,15 @@ def createAccount(customer_number, accountName, bearer_token, Environment):
     else:
         account_id = None
     print("account id line 139", account_id)
-    if 'message' in response_json == "Name must be unique. One per customer.":
+    if response_json.get('message') == "Name must be unique. One per customer.":
         account_id = getPreviousAccountNameID(customer_number, bearer_token, accountName, Environment)
-    else:    
+    else:
         return {
             'statusCode': 200,
             'body': 'completed!',
             'accountId': account_id,
             'bearerToken': bearer_token
         }
-
-    
-    
 
     return {
         'statusCode': 200,
