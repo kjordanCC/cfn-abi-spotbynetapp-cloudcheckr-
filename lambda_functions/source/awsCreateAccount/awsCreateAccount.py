@@ -12,7 +12,7 @@ import threading
 import logging
 
 def lambda_handler(event, context):
-    response = {'accountId': None}
+    #response = {'accountId': None}
     timer = threading.Timer((context.get_remaining_time_in_millis() / 1000.00) - 0.5, timeout, args=[event, context])
     timer.start()
     try:
@@ -29,8 +29,8 @@ def lambda_handler(event, context):
             accountName = account_aliases[0] if account_aliases else account_number
 
             bearerToken = get_access_token("https://auth-"+Environment+".cloudcheckr.com/auth/connect/token", APIKey, APISecret)
-        
             response = createAccount(customerNumber, accountName, bearerToken, Environment)
+            print("Response line 33: ", response)
             if response.get('accountId') is None:
                 sendResponse = send_response(event, context, 'FAILED', {'Error': 'An error occurred during the Lambda execution: ' + response['body']})
                 return {
@@ -48,7 +48,7 @@ def lambda_handler(event, context):
 
     finally:
         timer.cancel()
-        print("Response: ", response['accountId'])
+        print("Response line 51: ", response['accountId'])
         sendResponse = send_response(event, context, 'SUCCESS', {'accountNumber': response['accountId']})
 
 def timeout(event, context):
@@ -96,7 +96,9 @@ def getPreviousAccountNameID(customer_number, bearer_token, accountName, Environ
     #Check to see if id exists in response
     if 'id' in response_json:
         account_id = response_json.get('id')
+        print("line 99 Account ID: ", account_id)
     else:
+        print("line 101 Account ID: ", None)
         account_id = None
     
     if account_id is None:
@@ -127,13 +129,14 @@ def createAccount(customer_number, accountName, bearer_token, Environment):
     response_text = response.read().decode()
 
     response_json = json.loads(response_text)
+
     #Check to see if id exists in response
-    print(response_json)
+    print("json response line 134: ", response_json)
     if 'id' in response_json:
         account_id = response_json.get('id')
     else:
         account_id = None
-    print(account_id)
+    print("account id line 139", account_id)
     if 'message' in response_json == "Name must be unique. One per customer.":
         account_id = getPreviousAccountNameID(customer_number, bearer_token, accountName, Environment)
     else:    
