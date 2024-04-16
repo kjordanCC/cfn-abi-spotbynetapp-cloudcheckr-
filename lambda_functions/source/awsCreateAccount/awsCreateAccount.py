@@ -94,7 +94,6 @@ def getPreviousAccountNameID(customer_number, bearer_token, accountName, Environ
         timeout=15)
     
     response_text = response.read().decode()
-
     response_json = json.loads(response_text)
     #Check to see if id exists in response
     if 'id' in response_json:
@@ -131,26 +130,35 @@ def createAccount(customer_number, accountName, bearer_token, Environment):
         timeout=15)
     
     response_text = response.read().decode()
-
     response_json = json.loads(response_text)
 
-    #Check to see if id exists in response
     print("json response line 134: ", response_json)
-    if 'id' in response_json:
+    
+    # Initialize account_id to None
+    account_id = None
+    
+    # Check if there's an error field in the response
+    if 'error' in response_json and 'details' in response_json['error']:
+        # Iterate through the details array
+        for detail in response_json['error']['details']:
+            # Check if the error message is the unique name message
+            if detail.get('message') == "Name must be unique. One per customer.":
+                account_id = getPreviousAccountNameID(customer_number, bearer_token, accountName, Environment)
+                break  # Break out of the loop once the ID is found
+    else:
+        # If there's no error, get the account_id from the expected location
         account_id = response_json.get('id')
-    else:
-        account_id = None
-    print("account id line 139", account_id)
-    if response_json.get('message') == "Name must be unique. One per customer.":
-        account_id = getPreviousAccountNameID(customer_number, bearer_token, accountName, Environment)
-    else:
+    
+    # If after checking errors, account_id is still None, handle as an error case
+    if account_id is None:
+        print("Error: account_id is None after createAccount. Response was:", response_json)
         return {
-            'statusCode': 200,
-            'body': 'completed!',
-            'accountId': account_id,
-            'bearerToken': bearer_token
+            'statusCode': 500,
+            'body': 'An error occurred: No account ID found in the response.',
+            'error': response_json
         }
 
+    # If account_id is not None, return it in the response
     return {
         'statusCode': 200,
         'body': 'completed!',
