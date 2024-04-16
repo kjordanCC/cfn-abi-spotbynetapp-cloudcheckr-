@@ -128,11 +128,12 @@ def createAccount(customer_number, accountName, bearer_token, Environment):
 
     response_json = json.loads(response_text)
     #Check to see if id exists in response
+    print(response_json)
     if 'id' in response_json:
         account_id = response_json.get('id')
     else:
         account_id = None
-    
+    print(account_id)
     if 'message' in response_json == "Name must be unique. One per customer.":
         account_id = getPreviousAccountNameID(customer_number, bearer_token, accountName, Environment)
     else:    
@@ -175,5 +176,6 @@ def get_account_name():
     iam = boto3.client('iam')
     response = iam.list_account_aliases()
     account_number = boto3.client('sts').get_caller_identity()['Account']
+    print(response['AccountAliases'], account_number)
     return response['AccountAliases'], account_number
 

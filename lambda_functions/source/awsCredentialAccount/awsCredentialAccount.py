@@ -15,6 +15,7 @@ def lambda_handler(event, context):
     response = None
     timer = threading.Timer((context.get_remaining_time_in_millis() / 1000.00) - 0.5, timeout, args=[event, context])
     timer.start()
+    print("Event: ", event)
     try:
         if event['RequestType'] == 'Delete':
             send_response(event, context, 'SUCCESS', {'Message': 'Resource deletion completed'})
@@ -35,6 +36,7 @@ def lambda_handler(event, context):
         
     except Exception as e:
         timer.cancel()
+        print("Error: ", e)
         sendResponse = send_response(event, context, 'FAILED', {'Error': 'An error occurred during the Lambda execution: ' + str(e)})
         return {
             'statusCode': 500,
@@ -71,6 +73,7 @@ def credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken, Envir
 
     request = urllib.request.Request(url, headers=headers, data=payload.encode(), method='PUT')
     try:
+        print("Request: ", request)
         response = urllib.request.urlopen(request, timeout=15)
     except urllib.error.HTTPError as e:
         raise
