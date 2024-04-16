@@ -12,7 +12,7 @@ import threading
 import logging
 
 def lambda_handler(event, context):
-    #response = {'accountId': None}
+    response = {'accountId': None}
     timer = threading.Timer((context.get_remaining_time_in_millis() / 1000.00) - 0.5, timeout, args=[event, context])
     timer.start()
     try:
