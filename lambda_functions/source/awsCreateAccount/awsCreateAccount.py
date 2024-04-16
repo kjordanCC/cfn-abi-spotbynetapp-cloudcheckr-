@@ -48,6 +48,7 @@ def lambda_handler(event, context):
 
     finally:
         timer.cancel()
+        print("Response: ", response['accountId'])
         sendResponse = send_response(event, context, 'SUCCESS', {'accountNumber': response['accountId']})
 
 def timeout(event, context):

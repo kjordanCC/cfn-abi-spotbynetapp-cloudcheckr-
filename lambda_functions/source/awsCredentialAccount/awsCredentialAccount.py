@@ -43,6 +43,7 @@ def lambda_handler(event, context):
 
     finally:
         timer.cancel()
+        print("Response: ", response)
         sendResponse = send_response(event, context, 'SUCCESS', {'Success': response})
         return response
 
