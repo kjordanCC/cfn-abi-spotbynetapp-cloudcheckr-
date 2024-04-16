@@ -15,19 +15,22 @@ def lambda_handler(event, context):
     response = {'accountId': None}
     timer = threading.Timer((context.get_remaining_time_in_millis() / 1000.00) - 0.5, timeout, args=[event, context])
     timer.start()
+    print("line 18 Event: ", event)
     try:
         APIKey = event['ResourceProperties']['pAPIKey']
         APISecret = event['ResourceProperties']['pAPISecret']
         Environment = event['ResourceProperties']['pEnvironment']
         customerNumber = event['ResourceProperties']['pCustomerNumber']
 
-
+        print("line 24 Event: ", event)
         if event['RequestType'] == 'Delete':
             send_response(event, context, 'SUCCESS', {'Message': 'Resource deletion completed'})
         else:
             account_aliases, account_number = get_account_name()
+            print("line 29 Account Aliases: ", account_aliases)
+            print("line 30 Account Number: ", account_number)
             accountName = account_aliases[0] if account_aliases else account_number
-
+            print("line 32 Account Name: ", accountName)
             bearerToken = get_access_token("https://auth-"+Environment+".cloudcheckr.com/auth/connect/token", APIKey, APISecret)
             response = createAccount(customerNumber, accountName, bearerToken, Environment)
             print("Response line 33: ", response)
@@ -108,6 +111,7 @@ def getPreviousAccountNameID(customer_number, bearer_token, accountName, Environ
 
 def createAccount(customer_number, accountName, bearer_token, Environment):
     url = "https://api-"+Environment+".cloudcheckr.com/customer/v1/customers/" + str(customer_number) + "/account-management/accounts"
+    print("line 113 url: ", url)
     payload = json.dumps({
         "item": {
             "name": accountName,
