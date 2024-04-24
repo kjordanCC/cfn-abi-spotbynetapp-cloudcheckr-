@@ -80,37 +80,34 @@ def send_response(event, context, response_status, response_data):
         pass
 
 def getPreviousAccountNameID(customer_number, bearer_token, accountName, Environment):
-    #{{baseUrl}}/customer/v1/customers/:customerId/account-management/accounts?search=KurtCheckingTestName
-    url = "https://api-"+Environment+".cloudcheckr.com/customer/v1/customers/" + str(customer_number) + "/account-management/accounts?search=" + str(accountName)
+    url = f"https://api-{Environment}.cloudcheckr.com/customer/v1/customers/{customer_number}/account-management/accounts?search={accountName}"
     headers = {
         'Accept': 'text/plain',
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + bearer_token
     }
-    response = urllib.request.urlopen(urllib.request.Request(
-        url,
-        headers=headers,
-        method='GET'),
-        timeout=15)
-    
-    response_text = response.read().decode()
-    response_json = json.loads(response_text)
-    #Check to see if id exists in response
-    if 'id' in response_json:
-        account_id = response_json.get('id')
-        print("line 99 Account ID: ", account_id)
-    else:
-        print("line 101 Account ID: ", None)
-        account_id = None
-    
-    if account_id is None:
+    try:
+        request = urllib.request.Request(url, headers=headers, method='GET')
+        with urllib.request.urlopen(request, timeout=15) as response:
+            response_text = response.read().decode()
+            response_json = json.loads(response_text)
+            if 'items' in response_json and len(response_json['items']) > 0:
+                account_id = response_json['items'][0].get('id')
+                print(f"Account ID found: {account_id}")
+                return account_id
+            else:
+                print("No accounts found matching the search.")
+                return None
+    except urllib.error.HTTPError as e:
+        print(f"HTTP Error while retrieving account ID: {e}")
         return None
-    else:
-        return account_id
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return None
+
 
 def createAccount(customer_number, accountName, bearer_token, Environment):
-    url = "https://api-"+Environment+".cloudcheckr.com/customer/v1/customers/" + str(customer_number) + "/account-management/accounts"
-    print("line 113 url: ", url)
+    url = f"https://api-{Environment}.cloudcheckr.com/customer/v1/customers/{customer_number}/account-management/accounts"
     payload = json.dumps({
         "item": {
             "name": accountName,
@@ -122,49 +119,36 @@ def createAccount(customer_number, accountName, bearer_token, Environment):
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + bearer_token
     }
-    response = urllib.request.urlopen(urllib.request.Request(
-        url,
-        headers=headers,
-        data=payload.encode(),
-        method='POST'),
-        timeout=15)
-    
-    response_text = response.read().decode()
-    response_json = json.loads(response_text)
+    try:
+        request = urllib.request.Request(url, data=payload.encode(), headers=headers, method='POST')
+        with urllib.request.urlopen(request, timeout=15) as response:
+            response_text = response.read().decode()
+            response_json = json.loads(response_text)
 
-    print("json response line 134: ", response_json)
-    
-    # Initialize account_id to None
-    account_id = None
-    
-    # Check if there's an error field in the response
-    if 'error' in response_json and 'details' in response_json['error']:
-        # Iterate through the details array
-        for detail in response_json['error']['details']:
-            # Check if the error message is the unique name message
-            if detail.get('message') == "Name must be unique. One per customer.":
-                account_id = getPreviousAccountNameID(customer_number, bearer_token, accountName, Environment)
-                break  # Break out of the loop once the ID is found
-    else:
-        # If there's no error, get the account_id from the expected location
-        account_id = response_json.get('id')
-    
-    # If after checking errors, account_id is still None, handle as an error case
-    if account_id is None:
-        print("Error: account_id is None after createAccount. Response was:", response_json)
-        return {
-            'statusCode': 500,
-            'body': 'An error occurred: No account ID found in the response.',
-            'error': response_json
-        }
+            if 'id' in response_json:
+                return {
+                    'statusCode': 200,
+                    'body': 'completed!',
+                    'accountId': response_json['id'],
+                    'bearerToken': bearer_token
+                }
 
-    # If account_id is not None, return it in the response
-    return {
-        'statusCode': 200,
-        'body': 'completed!',
-        'accountId': account_id,
-        'bearerToken': bearer_token
-    }
+            print("json response line 134: ", response_json)
+            return {'statusCode': 200, 'body': 'No ID found, but no errors', 'accountId': None, 'bearerToken': bearer_token}
+
+    except urllib.error.HTTPError as e:
+        print(f"HTTP Error: {e.code} {e.reason}")
+        if e.code == 400:
+            account_id = getPreviousAccountNameID(customer_number, bearer_token, accountName, Environment)
+            if account_id:
+                return {'statusCode': 200, 'body': 'Account ID retrieved from existing account', 'accountId': account_id, 'bearerToken': bearer_token}
+            else:
+                return {'statusCode': 500, 'body': 'Failed to retrieve existing account ID', 'accountId': None, 'bearerToken': bearer_token}
+        else:
+            return {'statusCode': e.code, 'body': str(e.reason), 'accountId': None, 'bearerToken': bearer_token}
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return {'statusCode': 500, 'body': 'An unexpected error occurred', 'accountId': None, 'bearerToken': bearer_token}
 
 def get_access_token(url, client_id, client_secret):
     auth_header = base64.b64encode(f"{client_id}:{client_secret}".encode("utf-8")).decode("utf-8")
