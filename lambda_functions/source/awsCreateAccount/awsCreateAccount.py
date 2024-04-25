@@ -15,25 +15,19 @@ def lambda_handler(event, context):
     response = {'accountId': None}
     timer = threading.Timer((context.get_remaining_time_in_millis() / 1000.00) - 0.5, timeout, args=[event, context])
     timer.start()
-    print("line 18 Event: ", event)
     try:
         APIKey = event['ResourceProperties']['pAPIKey']
         APISecret = event['ResourceProperties']['pAPISecret']
         Environment = event['ResourceProperties']['pEnvironment']
         customerNumber = event['ResourceProperties']['pCustomerNumber']
 
-        print("line 24 Event: ", event)
         if event['RequestType'] == 'Delete':
             send_response(event, context, 'SUCCESS', {'Message': 'Resource deletion completed'})
         else:
             account_aliases, account_number = get_account_name()
-            print("line 29 Account Aliases: ", account_aliases)
-            print("line 30 Account Number: ", account_number)
             accountName = account_aliases[0] if account_aliases else account_number
-            print("line 32 Account Name: ", accountName)
             bearerToken = get_access_token("https://auth-"+Environment+".cloudcheckr.com/auth/connect/token", APIKey, APISecret)
             response = createAccount(customerNumber, accountName, bearerToken, Environment)
-            print("Response line 33: ", response)
             if response.get('accountId') is None:
                 sendResponse = send_response(event, context, 'FAILED', {'Error': 'An error occurred during the Lambda execution: ' + response['body']})
                 return {
@@ -51,7 +45,6 @@ def lambda_handler(event, context):
 
     finally:
         timer.cancel()
-        print("Response line 51: ", response['accountId'])
         sendResponse = send_response(event, context, 'SUCCESS', {'accountNumber': response['accountId']})
 
 def timeout(event, context):
@@ -133,7 +126,6 @@ def createAccount(customer_number, accountName, bearer_token, Environment):
                     'bearerToken': bearer_token
                 }
 
-            print("json response line 134: ", response_json)
             return {'statusCode': 200, 'body': 'No ID found, but no errors', 'accountId': None, 'bearerToken': bearer_token}
 
     except urllib.error.HTTPError as e:
@@ -141,14 +133,14 @@ def createAccount(customer_number, accountName, bearer_token, Environment):
         if e.code == 400:
             account_id = getPreviousAccountNameID(customer_number, bearer_token, accountName, Environment)
             if account_id:
-                return {'statusCode': 200, 'body': 'Account ID retrieved from existing account', 'accountId': account_id, 'bearerToken': bearer_token}
+                return {'statusCode': 200, 'body': 'Account ID retrieved from existing account', 'accountId': account_id}
             else:
-                return {'statusCode': 500, 'body': 'Failed to retrieve existing account ID', 'accountId': None, 'bearerToken': bearer_token}
+                return {'statusCode': 500, 'body': 'Failed to retrieve existing account ID', 'accountId': None}
         else:
-            return {'statusCode': e.code, 'body': str(e.reason), 'accountId': None, 'bearerToken': bearer_token}
+            return {'statusCode': e.code, 'body': str(e.reason), 'accountId': None}
     except Exception as e:
         print(f"Unexpected error: {e}")
-        return {'statusCode': 500, 'body': 'An unexpected error occurred', 'accountId': None, 'bearerToken': bearer_token}
+        return {'statusCode': 500, 'body': 'An unexpected error occurred', 'accountId': None}
 
 def get_access_token(url, client_id, client_secret):
     auth_header = base64.b64encode(f"{client_id}:{client_secret}".encode("utf-8")).decode("utf-8")

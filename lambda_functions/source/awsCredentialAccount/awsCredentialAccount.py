@@ -15,7 +15,6 @@ def lambda_handler(event, context):
     response = None
     timer = threading.Timer((context.get_remaining_time_in_millis() / 1000.00) - 0.5, timeout, args=[event, context])
     timer.start()
-    print("Event: ", event)
     try:
         if event['RequestType'] == 'Delete':
             send_response(event, context, 'SUCCESS', {'Message': 'Resource deletion completed'})
@@ -32,7 +31,6 @@ def lambda_handler(event, context):
 
 
             response = credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken, Environment)
-            print("Response line 35: ", response)
 
         
     except Exception as e:
@@ -46,7 +44,6 @@ def lambda_handler(event, context):
 
     finally:
         timer.cancel()
-        print("Response: ", response)
         sendResponse = send_response(event, context, 'SUCCESS', {'Success': response})
         return response
 
@@ -56,7 +53,6 @@ def timeout(event, context):
 
 def credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken, Environment):
     url = f"https://api-"+Environment+".cloudcheckr.com/credential/v1/customers/"+customerNumber+"/accounts/"+accountNumber+"/credentials/aws"   
-    print("url line 59: ", url)
     
     payload = json.dumps({
         "item": {
@@ -66,7 +62,6 @@ def credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken, Envir
             }
         }
     })
-    print("Payload line 69: ", payload)
 
     headers = {
         'Accept': 'application/json',
@@ -76,7 +71,6 @@ def credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken, Envir
 
     request = urllib.request.Request(url, headers=headers, data=payload.encode(), method='PUT')
     try:
-        print("Request: ", request)
         response = urllib.request.urlopen(request, timeout=15)
     except urllib.error.HTTPError as e:
         raise
