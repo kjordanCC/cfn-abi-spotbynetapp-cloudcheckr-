@@ -32,6 +32,7 @@ def lambda_handler(event, context):
 
 
             response = credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken, Environment)
+            print("Response line 35: ", response)
 
         
     except Exception as e:
@@ -54,7 +55,8 @@ def timeout(event, context):
     send_response(event, context, 'FAILED', {'Error': 'Execution is about to time out'})
 
 def credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken, Environment):
-    url = f"https://api-"+Environment+".cloudcheckr.com/credential/v1/customers/{customerNumber}/accounts/{accountNumber}/credentials/aws"
+    url = f"https://api-"+Environment+".cloudcheckr.com/credential/v1/customers/{customerNumber}/accounts/{accountNumber}/credentials/aws"   
+    print("url line 59: ", url)
     
     payload = json.dumps({
         "item": {
@@ -64,6 +66,7 @@ def credentialAccount(customerNumber, accountNumber, RoleArn, bearerToken, Envir
             }
         }
     })
+    print("Payload line 69: ", payload)
 
     headers = {
         'Accept': 'application/json',
