@@ -26,7 +26,7 @@ description: Deployment steps
 
 Wait for the CloudFormation status to change to `CREATE_COMPLETE` state.
 
-## Launch using Customizations for Control Tower {#launch-cfct}
+## Launch using Customizations for Control Tower or as a Stack Set {#launch-cfct}
 
 You can use CfCT to deploy the templates provided with the AWS Built-in package.
 
@@ -34,9 +34,17 @@ You can use CfCT to deploy the templates provided with the AWS Built-in package.
 
 The CfCT solution does not launch resources on the management account. Therefore, you must create the role with required permissions in the management account.
 
+Control Tower permissions:
+(/images/control-tower-admin.png)
+
+StackSet permissions:
+
+(/images/stack-set-admin.png)
+
 ### How it works
 
 To deploy this sample partner integration page using CfCT, add the following blurb to the `manifest.yaml` file from your CfCT solution and update the account/ou names as needed.
+
 
 ```yaml
 resources:
