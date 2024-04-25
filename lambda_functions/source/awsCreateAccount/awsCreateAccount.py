@@ -80,7 +80,7 @@ def send_response(event, context, response_status, response_data):
         pass
 
 def getPreviousAccountNameID(customer_number, bearer_token, accountName, Environment):
-    url = f"https://api-{Environment}.cloudcheckr.com/customer/v1/customers/{customer_number}/account-management/accounts?search={accountName}"
+    url = f"https://api-"+Environment+".cloudcheckr.com/customer/v1/customers/"+customer_number+"/account-management/accounts?search="+accountName
     headers = {
         'Accept': 'text/plain',
         'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ def getPreviousAccountNameID(customer_number, bearer_token, accountName, Environ
 
 
 def createAccount(customer_number, accountName, bearer_token, Environment):
-    url = f"https://api-{Environment}.cloudcheckr.com/customer/v1/customers/{customer_number}/account-management/accounts"
+    url = f"https://api-"+Environment+".cloudcheckr.com/customer/v1/customers/"+customer_number+"/account-management/accounts"
     payload = json.dumps({
         "item": {
             "name": accountName,
