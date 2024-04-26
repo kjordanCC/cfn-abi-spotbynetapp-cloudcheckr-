@@ -35,6 +35,11 @@ If you created additional resources outside of the CloudFormation stack, manuall
 1. Navigate to the [AWS Lambda console](https://console.aws.amazon.com/lambda/).
 2. Locate the Lambda functions created by the AWS Built-in solution and delete them.
 
+### Deleting Previous ARN in CloudCheckr
+
+1. Navigate to the [CloudCheckr Account Management Console].
+2. Edit the credentialing field of the account and select "Delete" to remove the arn from the preexisting account.
+
 ## Verifying resource deletions
 
 In each service console, verify that all AWS Built-in resources are removed. If any resources remain, they may continue to incur costs.

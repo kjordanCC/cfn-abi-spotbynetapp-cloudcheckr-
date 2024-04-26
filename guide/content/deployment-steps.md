@@ -12,6 +12,7 @@ description: Deployment steps
     * List parameters:
         * **pAPIKey**: The API ID created in the CloudCheckr environment.
         * **pAPISecret**: The secret associated with the APIKey.
+        * **pEnvironment**: The environment associated with your CloudCheckr Instance (US, EU, AU, GOV)
         * **pCustomerNumber**: Found in the URL when logged into CloudCheckr, for example https://app-us.cloudcheckr.com/customers/1234567. In this example, the customer number is 1234567.
         * **pCurBucketName**: Name of the S3 bucket for CUR data (if master payer account).
         * **pCloudTrailBucketName**: Name of the S3 bucket for CloudTrail logs.
@@ -25,7 +26,7 @@ description: Deployment steps
 
 Wait for the CloudFormation status to change to `CREATE_COMPLETE` state.
 
-## Launch using Customizations for Control Tower {#launch-cfct}
+## Launch using Customizations for Control Tower or as a Stack Set {#launch-cfct}
 
 You can use CfCT to deploy the templates provided with the AWS Built-in package.
 
@@ -33,9 +34,17 @@ You can use CfCT to deploy the templates provided with the AWS Built-in package.
 
 The CfCT solution does not launch resources on the management account. Therefore, you must create the role with required permissions in the management account.
 
+Control Tower permissions:
+(/images/control-tower-admin.png)
+
+StackSet permissions:
+
+(/images/stack-set-admin.png)
+
 ### How it works
 
 To deploy this sample partner integration page using CfCT, add the following blurb to the `manifest.yaml` file from your CfCT solution and update the account/ou names as needed.
+
 
 ```yaml
 resources:
@@ -46,6 +55,8 @@ resources:
       - parameter_key: pAPIKey #The API ID created in the CloudCheckr environment.
         parameter_value: $[cloudcheckr/api_key]
       - parameter_key: pAPISecret #The API Secret created in the CloudCheckr environment.
+        parameter_value: $[cloudcheckr/api_secret]
+      - parameter_key: pEnvironment #The environment associated with your CloudCheckr Instance (US, EU, AU, GOV)
         parameter_value: $[cloudcheckr/api_secret]
       - parameter_key: pABISourceS3BucketName #The source S3 bucket name for ABI.
         parameter_value: aws-abi
