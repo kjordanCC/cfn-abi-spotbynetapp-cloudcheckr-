@@ -25,15 +25,17 @@ def lambda_handler(event, context):
             send_response(event, context, 'SUCCESS', {'Message': 'Resource deletion completed'})
         else:
             account_aliases, account_number = get_account_name()
-            accountName = account_aliases[0] if account_aliases else account_number
+            accountName = account_aliases[0] if account_aliases else None
             bearerToken = get_access_token("https://auth-"+Environment+".cloudcheckr.com/auth/connect/token", APIKey, APISecret)
-            response = createAccount(customerNumber, accountName, bearerToken, Environment)
-            if response.get('accountId') is None:
-                sendResponse = send_response(event, context, 'FAILED', {'Error': 'An error occurred during the Lambda execution: ' + response['body']})
-                return {
-                    'statusCode': 500,
-                    'body': 'An error occurred during the Lambda execution: ' + response['body']
-                }
+            response = getPreviousAccountNameID(customerNumber, bearerToken, account_number, Environment)
+            if response != None:
+                response = send_response(event, context, 'SUCCESS', {'accountNumber': response})
+            elif response is None:
+                response = createAccount(customerNumber, accountName, account_number, bearerToken, Environment)
+                if response['statusCode'] == 200:
+                    response = send_response(event, context, 'SUCCESS', {'accountNumber': response['accountId']})
+                else:
+                    response = send_response(event, context, 'FAILED', {'Error': response['body']})
             
     except Exception as e:
         timer.cancel()
@@ -72,75 +74,71 @@ def send_response(event, context, response_status, response_data):
     with urllib.request.urlopen(req) as f:
         pass
 
-def getPreviousAccountNameID(customer_number, bearer_token, accountName, Environment):
-    url = f"https://api-"+Environment+".cloudcheckr.com/customer/v1/customers/"+customer_number+"/account-management/accounts?search="+accountName
+def getPreviousAccountNameID(customer_number, bearer_token, accountname, environment):
+    url = f"https://api-"+environment+".cloudcheckr.com/customer/v1/customers/"+customer_number+"/account-management/accounts?search="+accountname
     headers = {
-        'Accept': 'text/plain',
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + bearer_token
+        'accept': 'text/plain',
+        'content-type': 'application/json',
+        'authorization': 'bearer ' + bearer_token
     }
     try:
         request = urllib.request.Request(url, headers=headers, method='GET')
         with urllib.request.urlopen(request, timeout=15) as response:
             response_text = response.read().decode()
             response_json = json.loads(response_text)
-            if 'items' in response_json and len(response_json['items']) > 0:
-                account_id = response_json['items'][0].get('id')
-                print(f"Account ID found: {account_id}")
+            if 'items' in response_json and len(response_json['items']) == 1:
+                account_id = response_json['items'][0]['id']
                 return account_id
             else:
-                print("No accounts found matching the search.")
+                print("No account found or multiple accounts found.")
                 return None
-    except urllib.error.HTTPError as e:
-        print(f"HTTP Error while retrieving account ID: {e}")
-        return None
+                
     except Exception as e:
-        print(f"Unexpected error: {e}")
+        print(f"error retrieving previous account id: {e}")
         return None
 
 
-def createAccount(customer_number, accountName, bearer_token, Environment):
-    url = f"https://api-"+Environment+".cloudcheckr.com/customer/v1/customers/"+customer_number+"/account-management/accounts"
+
+def createAccount(customer_number, accountname, account_number, bearer_token, environment):
+    url = f"https://api-"+environment+".cloudcheckr.com/customer/v1/customers/"+customer_number+"/account-management/accounts"
     payload = json.dumps({
         "item": {
-            "name": accountName,
-            "provider": "AWS"
+            "name": account_number + " - " + accountname,
+            "provider": "aws"
         }
     })
     headers = {
-        'Accept': 'text/plain',
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + bearer_token
+        'accept': 'text/plain',
+        'content-type': 'application/json',
+        'authorization': 'bearer ' + bearer_token
     }
     try:
         request = urllib.request.Request(url, data=payload.encode(), headers=headers, method='POST')
         with urllib.request.urlopen(request, timeout=15) as response:
             response_text = response.read().decode()
             response_json = json.loads(response_text)
-
             if 'id' in response_json:
                 return {
-                    'statusCode': 200,
+                    'statuscode': 200,
                     'body': 'completed!',
-                    'accountId': response_json['id'],
-                    'bearerToken': bearer_token
+                    'accountid': response_json['id'],
+                    'bearertoken': bearer_token
                 }
-
-            return {'statusCode': 200, 'body': 'No ID found, but no errors', 'accountId': None, 'bearerToken': bearer_token}
-
-    except urllib.error.HTTPError as e:
-        print(f"HTTP Error: {e.code} {e.reason}")
-        if e.code == 400:
-            account_id = getPreviousAccountNameID(customer_number, bearer_token, accountName, Environment)
-            if account_id:
-                return {'statusCode': 200, 'body': 'Account ID retrieved from existing account', 'accountId': account_id}
             else:
-                return {'statusCode': 500, 'body': 'Failed to retrieve existing account ID', 'accountId': None}
-        else:
-            return {'statusCode': e.code, 'body': str(e.reason), 'accountId': None}
+                return {
+                    'statuscode': 200,
+                    'body': 'no id found, errors',
+                    'accountid': None,
+                    'bearertoken': bearer_token
+                }
     except Exception as e:
-        print(f"Unexpected error: {e}")
-        return {'statusCode': 500, 'body': 'An unexpected error occurred', 'accountId': None}
+        print(f"unexpected error: {e}")
+        return {
+            'statuscode': 500,
+            'body': 'an unexpected error occurred',
+            'accountid': None
+        }
+
 
 def get_access_token(url, client_id, client_secret):
     auth_header = base64.b64encode(f"{client_id}:{client_secret}".encode("utf-8")).decode("utf-8")
